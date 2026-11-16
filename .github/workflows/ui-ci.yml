@@ -1,0 +1,57 @@
+name: UI CI
+on:
+    pull_request:
+        branches:
+            - main
+        types:
+            - opened
+            - edited
+            - synchronize
+        paths:
+            - "prisma-ui/**"
+            - ".github/workflows/ui-ci.yml"
+
+permissions:
+    contents: read
+
+defaults:
+    run:
+        working-directory: prisma-ui
+
+jobs:
+    lint:
+        runs-on: ubuntu-latest
+        name: Run eslint
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: lts/*
+                  cache: npm
+                  cache-dependency-path: prisma-ui/package-lock.json
+            - run: npm ci
+            - run: npm run lint
+    tsc:
+        runs-on: ubuntu-latest
+        name: Run tsc
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: lts/*
+                  cache: npm
+                  cache-dependency-path: prisma-ui/package-lock.json
+            - run: npm ci
+            - run: npm run tsc
+    prettier:
+        runs-on: ubuntu-latest
+        name: Run prettier
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: lts/*
+                  cache: npm
+                  cache-dependency-path: prisma-ui/package-lock.json
+            - run: npm ci
+            - run: npm run prettier

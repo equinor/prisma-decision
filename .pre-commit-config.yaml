@@ -1,0 +1,25 @@
+# Hooks carried over from prisma-decision-api; scoped so they do not touch prisma-ui.
+files: ^prisma-api/
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: 'alembic/versions/'
+      - id: end-of-file-fixer
+        exclude: 'alembic/versions/'
+      - id: check-yaml
+        exclude: 'alembic/versions/'
+
+  - repo: https://github.com/psf/black
+    rev: 25.9.0  # Use the latest stable version
+    hooks:
+      - id: black
+        exclude: 'alembic/versions/'
+
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.3.0
+    hooks:
+      - id: flake8
+        args: ['--config=prisma-api/solver/.flake8']
+        exclude: 'alembic/versions/'

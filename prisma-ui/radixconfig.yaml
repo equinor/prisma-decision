@@ -1,0 +1,35 @@
+apiVersion: radix.equinor.com/v1
+kind: RadixApplication
+metadata:
+    name: prisma-decision-web
+
+spec:
+    build:
+    environments:
+        - name: prod
+          build:
+            from: prisma-ui-v*
+        - name: test
+          build:
+            from: prisma-ui-test-v*
+        - name: dev
+          build:
+              from: main
+    components:
+        - name: frontend
+          src: ./prisma-ui
+          publicPort: http
+          ports:
+              - name: http
+                port: 3000
+    dnsAlias:
+        - alias: prisma
+          environment: prod
+          component: frontend
+        - alias: prisma-test
+          environment: test
+          component: frontend
+        - alias: prisma-dev
+          environment: dev
+          component: frontend 
+        

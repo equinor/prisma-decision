@@ -1,0 +1,73 @@
+on:
+    push:
+        branches:
+            - main
+        paths:
+            - "prisma-ui/**"
+            - "prisma-api/**"
+            - ".github/workflows/release-please.yml"
+            - ".release-please-manifest.json"
+            - "release-please-config.json"
+            - "release-please-config.all.json"
+
+permissions:
+    contents: write
+    pull-requests: write
+    id-token: write
+
+name: release-please
+
+jobs:
+    release-please:
+        runs-on: ubuntu-latest
+        outputs:
+            api-release-created: ${{ steps.release.outputs['prisma-api--release_created'] }}
+            any-release-created: ${{ steps.release.outputs.releases_created }}
+        steps:
+            # Only creates releases/tags (for both per-component and combined
+            # PRs). Release PRs are maintained in the release-prs job so a
+            # failure there cannot block the production jobs below.
+            - uses: googleapis/release-please-action@v5
+              id: release
+              with:
+                  skip-github-pull-request: true
+
+    # Release-please cannot open per-component PRs and one combined PR in a
+    # single run, so it runs once per config.
+    release-prs:
+        needs: release-please
+        if: ${{ !cancelled() }}
+        runs-on: ubuntu-latest
+        steps:
+            # After a release the remaining open release PRs are stale (e.g. the
+            # per-component PRs after the combined PR was merged). Release-please
+            # does not update PRs that have no candidates left, so close them;
+            # the runs below reopen any that still have pending changes.
+            - name: Close stale release PRs
+              if: needs.release-please.outputs.any-release-created == 'true'
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  GH_REPO: ${{ github.repository }}
+              run: |
+                  gh pr list --state open --label "autorelease: pending" --json number,headRefName \
+                      --jq '.[] | select(.headRefName | startswith("release-please--")) | .number' |
+                  while read -r pr; do
+                      gh pr close "$pr" --comment "Closed after a release; release-please will reopen it if changes are still pending."
+                  done
+
+            - uses: googleapis/release-please-action@v5
+              with:
+                  skip-github-release: true
+
+            - uses: googleapis/release-please-action@v5
+              with:
+                  config-file: release-please-config.all.json
+                  skip-github-release: true
+
+    migrate-api-prod:
+        needs: release-please
+        if: needs.release-please.outputs.api-release-created == 'true'
+        uses: ./.github/workflows/api-ef-migrations.yml
+        with:
+            env-name: Production
+        secrets: inherit

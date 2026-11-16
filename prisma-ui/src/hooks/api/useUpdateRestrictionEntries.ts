@@ -1,0 +1,46 @@
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiClient } from '../../api';
+import { showErrorToast } from '../../components/ShowToast';
+import { applyRestrictionEntry } from '../../utils/influenceDiagramValidationUtils';
+import { RestrictionEntry, RestrictionTable } from '../../validators';
+
+export const useUpdateRestrictionEntries = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: async (entry: RestrictionEntry) => {
+			const res = await apiClient.put('/restriction_entries', [entry]);
+			return res.data[0];
+		},
+		onMutate: async (updatedEntry: RestrictionEntry) => {
+			await queryClient.cancelQueries({ queryKey: ['restrictionTables'] });
+			const previousTables = queryClient.getQueryData<RestrictionTable[]>([
+				'restrictionTables',
+			]);
+
+			if (previousTables) {
+				queryClient.setQueryData(
+					['restrictionTables'],
+					applyRestrictionEntry(previousTables, updatedEntry),
+				);
+			}
+
+			return { previousTables };
+		},
+		onError: (_err, _updatedEntry, context) => {
+			showErrorToast('Failed to update restriction');
+			if (context?.previousTables) {
+				queryClient.setQueryData(['restrictionTables'], context.previousTables);
+			}
+			queryClient.invalidateQueries({ queryKey: ['restrictionTables'] });
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ['decisionTree'] });
+			queryClient.invalidateQueries({ queryKey: ['solution'] });
+			queryClient.invalidateQueries({ queryKey: ['restrictionTables'] });
+			queryClient.invalidateQueries({ queryKey: ['policyTable'] });
+			queryClient.refetchQueries({ queryKey: ['policyTable'], type: 'active' });
+			queryClient.invalidateQueries({ queryKey: ['influenceDiagramErrors'] });
+		},
+	});
+};

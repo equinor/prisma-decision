@@ -1,0 +1,109 @@
+min_version = "2026.5.0"
+
+[tools]
+azure-cli = "latest"
+dotnet = "10"
+"dotnet:dotnet-ef" = "10"
+docker-compose = "latest"
+node = "24"
+python = "3.11"
+poetry = "latest"
+pre-commit = "latest"
+
+[env]
+DOTNET_CLI_TELEMETRY_OPTOUT = "1"
+DOTNET_NOLOGO = "true"
+POETRY_VIRTUALENVS_IN_PROJECT = "true"
+
+[tasks.setup]
+description = "Install dependencies and check API prerequisites"
+run = [
+  "dotnet restore prisma-api/src/PrismaApi.sln",
+  "npm --prefix prisma-ui ci",
+  "cd prisma-api/solver && poetry install",
+  "pre-commit install",
+  'node "{{config_root}}/.mise/scripts/check-api-secrets.mjs"',
+]
+
+[tasks.dev]
+description = "Run the solver, API and UI locally with a SQLite database"
+run = [{ tasks = ["dev:solver", "dev:api", "dev:ui"] }]
+
+[tasks."dev:solver"]
+hide = true
+dir = "{{config_root}}/prisma-api/solver/src"
+env = { PYTHONPATH = "{{config_root}}/prisma-api/solver" }
+run = "poetry run uvicorn main:app --reload --port 8000"
+
+[tasks."dev:api"]
+hide = true
+dir = "{{config_root}}/prisma-api/src"
+env = { ASPNETCORE_ENVIRONMENT = "Local", ASPNETCORE_URLS = "http://localhost:5199" }
+run = "dotnet watch --project PrismaApi.Api run --no-launch-profile"
+
+[tasks."dev:ui"]
+hide = true
+dir = "{{config_root}}/prisma-ui"
+env = { VITE_APP_PRISMA_API_URL = "http://localhost:5199/" }
+run = "npm run dev"
+
+[tasks."dev:ui:remote"]
+description = "Run the UI locally against the remote development API"
+dir = "{{config_root}}/prisma-ui"
+run = "npm run dev"
+
+[tasks.research]
+description = "Run the solver, API and UI in Docker in Research mode (no sign-in, SQLite)"
+run = 'docker-compose --project-directory "{{config_root}}" up --build'
+
+[tasks."db:migration:add"]
+description = "Add an EF Core migration for both SQLite and SQL Server"
+dir = "{{config_root}}/prisma-api/src"
+usage = 'arg "<name>" help="Migration name"'
+run = './scripts/Add-Migrations.sh "${usage_name?}"'
+
+[tasks."db:migration:remove"]
+description = "Remove the last EF Core migration for both SQLite and SQL Server"
+dir = "{{config_root}}/prisma-api/src"
+run = "./scripts/Remove-Last-Migration.sh"
+
+[tasks."release:public"]
+description = "Deploy the current commit to the public environment by moving the PUBLIC tag"
+run = [
+  "git fetch origin --tags --force",
+  "git tag -f PUBLIC",
+  "git push -f origin refs/tags/PUBLIC",
+]
+
+[tasks."release:design"]
+description = "Deploy the current commit to the design environment by moving the DESIGN tag"
+run = [
+  "git fetch origin --tags --force",
+  "git tag -f DESIGN",
+  "git push -f origin refs/tags/DESIGN",
+]
+
+[tasks.build]
+description = "Build the API and UI"
+run = [
+  "dotnet build prisma-api/src/PrismaApi.sln --configuration Release",
+  "npm --prefix prisma-ui run build",
+]
+
+[tasks.check]
+description = "Run the same API and UI checks as CI"
+run = [
+  "dotnet build prisma-api/src/PrismaApi.sln --configuration Release",
+  "dotnet test prisma-api/src/PrismaApi.Test/PrismaApi.Test.csproj --configuration Release --no-build",
+  "npm --prefix prisma-ui run lint",
+  "npm --prefix prisma-ui run tsc",
+  "npm --prefix prisma-ui run prettier",
+]
+
+[tasks.test]
+description = "Run API, solver and UI tests"
+run = [
+  "dotnet test prisma-api/src/PrismaApi.Test/PrismaApi.Test.csproj",
+  "cd prisma-api/solver && poetry run pytest",
+  "npm --prefix prisma-ui test",
+]

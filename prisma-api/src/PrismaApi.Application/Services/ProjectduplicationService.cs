@@ -1,0 +1,811 @@
+using Microsoft.Extensions.Caching.Memory;
+using PrismaApi.Application.Interfaces.Repositories;
+using PrismaApi.Application.Interfaces.Services;
+using PrismaApi.Domain.Constants;
+using PrismaApi.Domain.Dtos;
+using PrismaApi.Infrastructure.Caching;
+
+namespace PrismaApi.Application.Services;
+
+public class ProjectDuplicationService : IProjectDuplicationService
+{
+    private readonly IProjectDuplicationRepository _duplicationRepo;
+    private readonly IProjectService _projectService;
+    private readonly IIssueService _issueService;
+    private readonly IEdgeService _edgeService;
+    private readonly IStrategyService _strategyService;
+    private readonly IDiscreteProbabilityService _discreteProbabilityService;
+    private readonly IDiscreteUtilityService _discreteUtilityService;
+    private readonly IAssessmentService _assessmentService;
+    private readonly IObjectiveService _objectiveService;
+    private readonly IDecisionQualityAssessmentService _decisionQualityAssessmentService;
+    private readonly IBoardNodeService _boardNodeService;
+    private readonly IBoardSheetService _boardSheetService;
+    private readonly IRestrictionTableService _restrictionTableService;
+    private readonly IStakeholderMatrixEntryService _stakeholderMatrixEntryService;
+    private readonly IMemoryCache _cache;
+
+    public ProjectDuplicationService(
+        IProjectDuplicationRepository duplicationRepo,
+        IProjectService projectService,
+        IIssueService issueService,
+        IEdgeService edgeService,
+        IStrategyService strategyService,
+        IDiscreteProbabilityService discreteProbabilityService,
+        IDiscreteUtilityService discreteUtilityService,
+        IMemoryCache cache,
+        IAssessmentService assessmentService,
+        IDecisionQualityAssessmentService decisionQualityAssessmentService,
+        IBoardNodeService boardNodeService,
+        IBoardSheetService boardSheetService,
+        IRestrictionTableService restrictionTableService,
+        IObjectiveService objectiveService,
+        IStakeholderMatrixEntryService stakeholderMatrixEntryService)
+    {
+        _duplicationRepo = duplicationRepo;
+        _projectService = projectService;
+        _issueService = issueService;
+        _edgeService = edgeService;
+        _strategyService = strategyService;
+        _discreteProbabilityService = discreteProbabilityService;
+        _discreteUtilityService = discreteUtilityService;
+        _assessmentService = assessmentService;
+        _decisionQualityAssessmentService = decisionQualityAssessmentService;
+        _boardNodeService = boardNodeService;
+        _boardSheetService = boardSheetService;
+        _restrictionTableService = restrictionTableService;
+        _objectiveService = objectiveService;
+        _stakeholderMatrixEntryService = stakeholderMatrixEntryService;
+        _cache = cache;
+    }
+
+    public async Task<ProjectOutgoingDto> DuplicateAsync(Guid projectId, UserOutgoingDto user, CancellationToken ct = default)
+    {
+        bool createDefaultRole = false;
+        var fullProject = await _duplicationRepo.GetFullProjectForDuplicationAsync(projectId, user, ct);
+        if (fullProject is null)
+            throw new KeyNotFoundException($"Project {projectId} not found or access denied.");
+
+        var mappings = new IdMappings();
+        var newProjectId = Guid.NewGuid();
+        mappings.Project.Add(fullProject.Id, newProjectId);
+        GenerateIdMappings(
+            fullProject.Issues,
+            i => i.Node?.Id,
+            i => i.Uncertainty is null ? null : (i.Uncertainty.Id, i.Uncertainty.Outcomes.Select(o => o.Id)),
+            i => i.Decision is null ? null : (i.Decision.Id, i.Decision.Options.Select(o => o.Id)),
+            i => i.Utility?.Id,
+            mappings);
+
+        var createProjectDto = CreateProjectDto(fullProject, newProjectId, user);
+        var createdProjects = await _projectService.CreateAsync([createProjectDto], createDefaultRole, userDto: user);
+        var createdProject = createdProjects[0];
+
+        var issueDtos = new List<IssueIncomingDto>();
+        var discreteProbabilityDtos = new List<DiscreteProbabilityDto>();
+        var discreteUtilityDtos = new List<DiscreteUtilityDto>();
+
+        foreach (var issue in fullProject.Issues)
+        {
+            ct.ThrowIfCancellationRequested();
+            var mappedIssueId = GetMappedOrThrow(mappings.Issue, issue.Id, "issue");
+
+            var matchingDiscreteProbabilities = fullProject.DiscreteProbabilities
+                .Where(dp => dp.UncertaintyId == issue.Uncertainty?.Id)
+                .ToList();
+
+            var matchingDiscreteUtilities = fullProject.DiscreteUtilities
+                .Where(du => du.UtilityId == issue.Utility?.Id)
+                .ToList();
+
+            var uncertaintyResult = CreateUncertainty(
+                issue.Uncertainty?.Id, issue.Uncertainty?.IsKey ?? true,
+                issue.Uncertainty?.Outcomes, matchingDiscreteProbabilities,
+                mappedIssueId, mappings, newProjectId);
+            var utilityResult = CreateUtility(
+                issue.Utility?.Id, matchingDiscreteUtilities, mappedIssueId, mappings, newProjectId);
+
+            if (uncertaintyResult.DiscreteProbabilities.Count > 0)
+                discreteProbabilityDtos.AddRange(uncertaintyResult.DiscreteProbabilities);
+
+            if (utilityResult.DiscreteUtilities.Count > 0)
+                discreteUtilityDtos.AddRange(utilityResult.DiscreteUtilities);
+
+            issueDtos.Add(new IssueIncomingDto
+            {
+                Id = mappedIssueId,
+                ProjectId = newProjectId,
+                Name = issue.Name,
+                Description = issue.Description,
+                Order = issue.Order,
+                Type = issue.Type,
+                Boundary = issue.Boundary,
+                Node = CreateNode(issue.Node?.Id, issue.Node?.Name, issue.Node?.NodeStyle?.XPosition, issue.Node?.NodeStyle?.YPosition, issue.Name, newProjectId, mappedIssueId, mappings),
+                Decision = CreateDecision(issue.Decision?.Id, issue.Decision?.Type, issue.Decision?.Options, mappedIssueId, mappings, newProjectId),
+                Uncertainty = uncertaintyResult.Uncertainty,
+                Utility = utilityResult.Utility
+            });
+        }
+
+        if (issueDtos.Count > 0)
+            await _issueService.CreateAsync(issueDtos, user);
+
+        if (discreteProbabilityDtos.Count > 0)
+            await _discreteProbabilityService.CreateAsync(discreteProbabilityDtos);
+
+        if (discreteUtilityDtos.Count > 0)
+            await _discreteUtilityService.CreateAsync(discreteUtilityDtos);
+
+        var objectiveDtos = CreateObjectives(fullProject.objectives, newProjectId);
+
+        if (objectiveDtos.Count > 0)
+            await _objectiveService.CreateAsync(objectiveDtos, user);
+        var stakeholderMatrixEntryDtos = CreateStakeholderMatrixEntries(fullProject.StakeholderMatrixEntries, newProjectId);
+
+        if (stakeholderMatrixEntryDtos.Count > 0)
+            await _stakeholderMatrixEntryService.CreateAsync(stakeholderMatrixEntryDtos, user);
+        var strategyDtos = CreateStrategies(fullProject.strategies, s => s.Options, newProjectId, mappings);
+        if (strategyDtos.Count > 0)
+            await _strategyService.CreateAsync(strategyDtos, user);
+
+        var edgeDtos = CreateEdges(fullProject.Edges, newProjectId, mappings);
+        if (edgeDtos.Count > 0)
+            await _edgeService.CreateAsync(edgeDtos);
+
+        var restrictionTableDtos = CreateRestrictionTables(fullProject.RestrictionTables, rt => rt.RestrictionEntries, newProjectId, mappings);
+        if (restrictionTableDtos.Count > 0)
+            await _restrictionTableService.CreateAsync(restrictionTableDtos, user, ct);
+
+        _cache.InvalidateCacheEntry(new CacheItem { CacheKey = CacheKeys.GetUserKey(user.Id) }); // if internal
+        _cache.InvalidateCacheEntry(new CacheItem { CacheKey = CacheKeys.GetUserKey(user.Name) }); // if public
+
+        var (assessmentDtos, assessmentIdMap) = CreateAssessments(fullProject.Assessments, newProjectId);
+        if (assessmentDtos.Count > 0)
+            await _assessmentService.CreateAsync(assessmentDtos, user);
+
+        var decisionQualityAssessmentDtos = CreateDecisionQualityAssessments(fullProject.Assessments.SelectMany(a => a.DecisionQualityAssessments ?? []), assessmentIdMap, newProjectId);
+        if (decisionQualityAssessmentDtos.Count > 0)
+            await _decisionQualityAssessmentService.CreateAsync(decisionQualityAssessmentDtos, user, ct);
+
+        var boardSheetDtos = CreateBoardSheets(fullProject.BoardSheets, newProjectId, mappings);
+        if (boardSheetDtos.Count > 0)
+            await _boardSheetService.CreateAsync(boardSheetDtos, user, ct);
+
+        foreach (var boardNode in fullProject.BoardNodes)
+            mappings.Node[boardNode.Id] = Guid.NewGuid();
+
+        var boardNodes = CreateBoardNodes(fullProject.BoardNodes, newProjectId, mappings);
+        if (boardNodes.Count > 0)
+            await _boardNodeService.CreateAsync(boardNodes, user, ct);
+
+        return createdProject;
+    }
+
+    public async Task<ProjectOutgoingDto?> DuplicateImportedProjectAsync(ProjectImportDto dto, UserOutgoingDto user, CancellationToken ct = default)
+    {
+        ct.ThrowIfCancellationRequested();
+
+        var mappings = new IdMappings();
+        var newProjectId = Guid.NewGuid();
+        var importedProjectId = dto.Projects.Id == Guid.Empty ? Guid.NewGuid() : dto.Projects.Id;
+        mappings.Project[importedProjectId] = newProjectId;
+
+        var createProjectDto = CreateProjectDtoFromImport(dto.Projects, newProjectId, user);
+        var createdProjects = await _projectService.CreateAsync([createProjectDto], createDefaultRole: false, userDto: user);
+        if (createdProjects.Count == 0)
+            return null;
+
+        GenerateIdMappings(
+            dto.Issues,
+            i => i.Node?.Id,
+            i => i.Uncertainty is null ? null : (i.Uncertainty.Id, i.Uncertainty.Outcomes.Select(o => o.Id)),
+            i => i.Decision is null ? null : (i.Decision.Id, i.Decision.Options.Select(o => o.Id)),
+            i => i.Utility?.Id,
+            mappings);
+
+        var issueDtos = new List<IssueIncomingDto>();
+        var discreteProbabilityDtos = new List<DiscreteProbabilityDto>();
+        var discreteUtilityDtos = new List<DiscreteUtilityDto>();
+
+        foreach (var issue in dto.Issues)
+        {
+            ct.ThrowIfCancellationRequested();
+            var mappedIssueId = GetMappedOrThrow(mappings.Issue, issue.Id, "issue");
+
+            var matchingDiscreteProbabilities = dto.DiscreteProbabilities
+                .Where(dp => dp.UncertaintyId == issue.Uncertainty?.Id)
+                .ToList();
+
+            var matchingDiscreteUtilities = dto.DiscreteUtilities
+                .Where(du => du.UtilityId == issue.Utility?.Id)
+                .ToList();
+
+            var uncertaintyResult = CreateUncertainty(
+                issue.Uncertainty?.Id, issue.Uncertainty?.IsKey ?? true,
+                issue.Uncertainty?.Outcomes, matchingDiscreteProbabilities,
+                mappedIssueId, mappings, newProjectId);
+            var utilityResult = CreateUtility(
+                issue.Utility?.Id, matchingDiscreteUtilities,
+                mappedIssueId, mappings, newProjectId);
+
+            if (uncertaintyResult.DiscreteProbabilities.Count > 0)
+                discreteProbabilityDtos.AddRange(uncertaintyResult.DiscreteProbabilities);
+
+            if (utilityResult.DiscreteUtilities.Count > 0)
+                discreteUtilityDtos.AddRange(utilityResult.DiscreteUtilities);
+
+            issueDtos.Add(new IssueIncomingDto
+            {
+                Id = mappedIssueId,
+                ProjectId = newProjectId,
+                Name = issue.Name,
+                Description = issue.Description,
+                Order = issue.Order,
+                Type = issue.Type,
+                Boundary = issue.Boundary,
+                Node = CreateNode(issue.Node?.Id, issue.Node?.Name, issue.Node?.NodeStyle?.XPosition, issue.Node?.NodeStyle?.YPosition, issue.Name, newProjectId, mappedIssueId, mappings),
+                Decision = CreateDecision(issue.Decision?.Id, issue.Decision?.Type, issue.Decision?.Options, mappedIssueId, mappings, newProjectId),
+                Uncertainty = uncertaintyResult.Uncertainty,
+                Utility = utilityResult.Utility
+            });
+        }
+
+        if (issueDtos.Count > 0)
+            await _issueService.CreateAsync(issueDtos, user);
+
+        if (discreteProbabilityDtos.Count > 0)
+            await _discreteProbabilityService.CreateAsync(discreteProbabilityDtos);
+
+        if (discreteUtilityDtos.Count > 0)
+            await _discreteUtilityService.CreateAsync(discreteUtilityDtos);
+
+        var objectiveDtos = CreateObjectives(dto.Objectives, newProjectId);
+        if (objectiveDtos.Count > 0)
+            await _objectiveService.CreateAsync(objectiveDtos, user);
+        var stakeholderMatrixEntryDtos = CreateStakeholderMatrixEntries(dto.StakeholderMatrixEntries, newProjectId);
+        if (stakeholderMatrixEntryDtos.Count > 0)
+            await _stakeholderMatrixEntryService.CreateAsync(stakeholderMatrixEntryDtos, user);
+        var strategyDtos = CreateStrategies(dto.Strategies, s => s.Options, newProjectId, mappings);
+        if (strategyDtos.Count > 0)
+            await _strategyService.CreateAsync(strategyDtos, user);
+
+        var edgeDtos = CreateEdges(dto.Edges, newProjectId, mappings);
+        if (edgeDtos.Count > 0)
+            await _edgeService.CreateAsync(edgeDtos);
+
+        var restrictionTableDtos = CreateRestrictionTables(dto.RestrictionTables, rt => rt.RestrictionEntries, newProjectId, mappings);
+        if (restrictionTableDtos.Count > 0)
+            await _restrictionTableService.CreateAsync(restrictionTableDtos, user, ct);
+
+        var (assessmentDtos, assessmentIdMap) = CreateAssessments(dto.Assessments, newProjectId);
+        if (assessmentDtos.Count > 0)
+            await _assessmentService.CreateAsync(assessmentDtos, user);
+
+        var decisionQualityAssessmentDtos = CreateDecisionQualityAssessments(dto.Assessments.SelectMany(a => a.DecisionQualityAssessments ?? []), assessmentIdMap, newProjectId);
+        if (decisionQualityAssessmentDtos.Count > 0)
+            await _decisionQualityAssessmentService.CreateAsync(decisionQualityAssessmentDtos, user, ct);
+
+        var boardSheetDtosFromImport = CreateBoardSheets(dto.BoardSheets, newProjectId, mappings);
+        if (boardSheetDtosFromImport.Count > 0)
+            await _boardSheetService.CreateAsync(boardSheetDtosFromImport, user, ct);
+
+        var boardNodes = CreateBoardNodes(dto.BoardNodes, newProjectId, mappings);
+        if (boardNodes.Count > 0)
+            await _boardNodeService.CreateAsync(boardNodes, user, ct);
+
+        return createdProjects[0];
+    }
+
+    private static void CreateFacilitatorRoleViaDuplicate(FullProjectForDuplicationDto fullProject, UserOutgoingDto user)
+    {
+        var existingUserRole = fullProject.Users.FirstOrDefault(u => u.UserId == user.Id);
+        if (existingUserRole is null)
+        {
+            throw new InvalidOperationException("You are not allowed to duplicate this project.");
+        }
+
+        if (existingUserRole.Role == ProjectRoleType.Member.ToString())
+        {
+            existingUserRole.Role = ProjectRoleType.Facilitator.ToString();
+
+        }
+    }
+
+    private static void CreateFacilitatorRoleViaImport(ProjectIncomingDto project, Guid newProjectId, UserOutgoingDto user)
+    {
+        var existingUserRole = project.Users.FirstOrDefault(u => u.UserId == user.Id);
+        if (existingUserRole is null)
+        {
+            project.Users.Add(new ProjectRoleIncomingDto
+            {
+                UserId = user.Id,
+                ProjectId = newProjectId,
+                Role = ProjectRoleType.Facilitator.ToString(),
+                Name = user.Name
+            });
+
+        }
+        else if (existingUserRole.Role == ProjectRoleType.Member.ToString())
+        {
+            existingUserRole.Role = ProjectRoleType.Facilitator.ToString();
+        }
+    }
+    private static ProjectCreateDto CreateProjectDto(FullProjectForDuplicationDto fullProject, Guid newProjectId, UserOutgoingDto user)
+    {
+        CreateFacilitatorRoleViaDuplicate(fullProject, user);
+        return new ProjectCreateDto
+        {
+            Id = newProjectId,
+            Name = $"copy of {fullProject.Name}",
+            ParentProjectId = fullProject.Id,
+            ParentProjectName = fullProject.Name,
+            OpportunityStatement = fullProject.OpportunityStatement,
+            Public = fullProject.Public,
+            EndDate = fullProject.EndDate,
+            Users = fullProject.Users
+                .Select(u => new ProjectRoleCreateDto
+                {
+                    UserId = u.UserId,
+                    ProjectId = newProjectId,
+                    Role = u.Role,
+                    Name = u.Name,
+                })
+                .ToList()
+        };
+    }
+
+    private static ProjectCreateDto CreateProjectDtoFromImport(ProjectIncomingDto project, Guid newProjectId, UserOutgoingDto user)
+    {
+        CreateFacilitatorRoleViaImport(project, newProjectId, user);
+
+        return new ProjectCreateDto
+        {
+            Id = newProjectId,
+            Name = project.Name,
+            ParentProjectId = null,
+            ParentProjectName = string.Empty,
+            OpportunityStatement = project.OpportunityStatement,
+            Public = project.Public,
+            EndDate = project.EndDate,
+            Users = project.Users
+                .Select(u => new ProjectRoleCreateDto
+                {
+                    UserId = u.UserId,
+                    ProjectId = newProjectId,
+                    Role = u.Role,
+                    Name = u.Name,
+                })
+                .ToList()
+        };
+    }
+
+    private static DecisionIncomingDto? CreateDecision(
+        Guid? decisionId,
+        string? decisionType,
+        IEnumerable<OptionDto>? options,
+        Guid mappedIssueId,
+        IdMappings mappings,
+        Guid newProjectId)
+    {
+        if (decisionId is null)
+            return null;
+
+        var mappedDecisionId = GetMappedOrThrow(mappings.Decision, decisionId.Value, "decision");
+        return new DecisionIncomingDto
+        {
+            Id = mappedDecisionId,
+            IssueId = mappedIssueId,
+            ProjectId = newProjectId,
+            Type = decisionType ?? "Focus",
+            Options = (options ?? [])
+                .Select((option, index) => new OptionIncomingDto
+                {
+                    Id = GetMappedOrThrow(mappings.Option, option.Id, "option"),
+                    DecisionId = mappedDecisionId,
+                    ProjectId = newProjectId,
+                    Name = option.Name,
+                    Utility = option.Utility,
+                    CreatedAt = GetCreatedAtOrOrderFallback(option.CreatedAt, index)
+                })
+                .ToList()
+        };
+    }
+
+    private static NodeIncomingDto? CreateNode(
+        Guid? sourceNodeId,
+        string? sourceNodeName,
+        double? xPosition,
+        double? yPosition,
+        string issueName,
+        Guid newProjectId,
+        Guid mappedIssueId,
+        IdMappings mappings)
+    {
+        if (sourceNodeId is null || xPosition is null || yPosition is null)
+            return null;
+
+        var mappedNodeId = GetMappedOrThrow(mappings.Node, sourceNodeId.Value, "node");
+        return new NodeIncomingDto
+        {
+            Id = mappedNodeId,
+            ProjectId = newProjectId,
+            IssueId = mappedIssueId,
+            Name = string.IsNullOrWhiteSpace(sourceNodeName) ? issueName : sourceNodeName,
+            NodeStyle = new NodeStyleIncomingDto
+            {
+                Id = Guid.NewGuid(),
+                NodeId = mappedNodeId,
+                XPosition = xPosition.Value,
+                YPosition = yPosition.Value
+            }
+        };
+    }
+
+    private static (UncertaintyIncomingDto? Uncertainty, List<DiscreteProbabilityDto> DiscreteProbabilities) CreateUncertainty(
+        Guid? uncertaintyId,
+        bool isKey,
+        IEnumerable<OutcomeDto>? outcomes,
+        IEnumerable<DiscreteProbabilityDto>? discreteProbabilities,
+        Guid mappedIssueId,
+        IdMappings mappings,
+        Guid newProjectId)
+    {
+        if (uncertaintyId is null)
+            return (null, []);
+
+        var mappedUncertaintyId = GetMappedOrThrow(mappings.Uncertainty, uncertaintyId.Value, "uncertainty");
+        var mappedOutcomes = (outcomes ?? [])
+            .Select((outcome, index) => new OutcomeIncomingDto
+            {
+                Id = GetMappedOrThrow(mappings.Outcome, outcome.Id, "outcome"),
+                Name = outcome.Name,
+                UncertaintyId = mappedUncertaintyId,
+                ProjectId = newProjectId,
+                Utility = outcome.Utility,
+                CreatedAt = GetCreatedAtOrOrderFallback(outcome.CreatedAt, index)
+            })
+            .ToList();
+
+        var mappedDiscreteProbabilities = (discreteProbabilities ?? [])
+            .Select(dp =>
+            {
+                var (parentOutcomeIds, parentOptionIds) = MapParentIds(dp.ParentOutcomeIds, dp.ParentOptionIds, mappings);
+                return new DiscreteProbabilityDto
+                {
+                    Id = Guid.NewGuid(),
+                    UncertaintyId = mappedUncertaintyId,
+                    OutcomeId = mappings.Outcome.GetValueOrDefault(dp.OutcomeId, dp.OutcomeId),
+                    ProjectId = newProjectId,
+                    Probability = dp.Probability,
+                    ParentOutcomeIds = parentOutcomeIds,
+                    ParentOptionIds = parentOptionIds
+                };
+            })
+            .ToList();
+
+        var uncertaintyDto = new UncertaintyIncomingDto
+        {
+            Id = mappedUncertaintyId,
+            IssueId = mappedIssueId,
+            ProjectId = newProjectId,
+            IsKey = isKey,
+            Outcomes = mappedOutcomes,
+        };
+
+        return (uncertaintyDto, mappedDiscreteProbabilities);
+    }
+
+    private static (UtilityIncomingDto? Utility, List<DiscreteUtilityDto> DiscreteUtilities) CreateUtility(
+        Guid? utilityId,
+        IEnumerable<DiscreteUtilityDto>? discreteUtilities,
+        Guid mappedIssueId,
+        IdMappings mappings,
+        Guid newProjectId)
+    {
+        if (utilityId is null)
+            return (null, []);
+
+        var mappedUtilityId = GetMappedOrThrow(mappings.Utility, utilityId.Value, "utility");
+        var utilityDto = new UtilityIncomingDto
+        {
+            Id = mappedUtilityId,
+            IssueId = mappedIssueId,
+            ProjectId = newProjectId
+        };
+
+        var mappedDiscreteUtilities = (discreteUtilities ?? [])
+            .Select(du =>
+            {
+                var (parentOutcomeIds, parentOptionIds) = MapParentIds(du.ParentOutcomeIds, du.ParentOptionIds, mappings);
+                return new DiscreteUtilityDto
+                {
+                    Id = Guid.NewGuid(),
+                    UtilityId = mappedUtilityId,
+                    UtilityValue = du.UtilityValue,
+                    ParentOptionIds = parentOptionIds,
+                    ParentOutcomeIds = parentOutcomeIds,
+                    ValueMetricId = du.ValueMetricId,
+                    ProjectId = newProjectId
+                };
+            })
+            .ToList();
+
+        return (utilityDto, mappedDiscreteUtilities);
+    }
+
+    private static List<ObjectiveIncomingDto> CreateObjectives<TObjective>(
+        IEnumerable<TObjective> objectives,
+        Guid newProjectId) where TObjective : ObjectiveDto
+    {
+        return objectives.Select(objective => new ObjectiveIncomingDto
+        {
+            Id = Guid.NewGuid(),
+            Name = objective.Name,
+            Description = objective.Description,
+            Type = objective.Type,
+            Ordering = objective.Ordering,
+            ProjectId = newProjectId
+        }).ToList();
+    }
+    private static List<StakeholderMatrixEntryIncomingDto> CreateStakeholderMatrixEntries<TStakeholder>(IEnumerable<TStakeholder> entries, Guid newProjectId)
+        where TStakeholder : StakeholderMatrixEntryDto
+    {
+        return entries.Select(stakeholderEntry => new StakeholderMatrixEntryIncomingDto
+        {
+            Id = Guid.NewGuid(),
+            StakeholderName = stakeholderEntry.StakeholderName,
+            StakeholderRole = stakeholderEntry.StakeholderRole,
+            AffectedByTheDecision = stakeholderEntry.AffectedByTheDecision,
+            AffectingTheDecision = stakeholderEntry.AffectingTheDecision,
+            ProjectId = newProjectId
+        }).ToList();
+    }
+    private static List<StrategyIncomingDto> CreateStrategies<TStrategy>(
+        IEnumerable<TStrategy> strategies,
+        Func<TStrategy, IEnumerable<OptionDto>> getOptions,
+        Guid newProjectId,
+        IdMappings mappings) where TStrategy : StrategyDto
+    {
+        return strategies.Select(strategy => new StrategyIncomingDto
+        {
+            Id = Guid.NewGuid(),
+            ProjectId = newProjectId,
+            Name = strategy.Name,
+            Description = strategy.Description,
+            Rationale = strategy.Rationale,
+            Icon = strategy.Icon,
+            IconColor = strategy.IconColor,
+            Options = getOptions(strategy).Select((option, index) => new OptionIncomingDto
+            {
+                Id = GetMappedOrThrow(mappings.Option, option.Id, "option"),
+                DecisionId = GetMappedOrThrow(mappings.Decision, option.DecisionId, "decision"),
+                ProjectId = newProjectId,
+                Name = option.Name,
+                Utility = option.Utility,
+                CreatedAt = GetCreatedAtOrOrderFallback(option.CreatedAt, index)
+            }).ToList()
+        }).ToList();
+    }
+    // this is used to ensure that if the CreatedAt is not set, we provide a fallback value based on the index to maintain order
+    private static DateTimeOffset GetCreatedAtOrOrderFallback(DateTimeOffset createdAt, int index)
+        => createdAt == default ? DateTimeOffset.UnixEpoch.AddSeconds(index + 1) : createdAt;
+
+    private static (List<AssessmentIncomingDto> Dtos, Dictionary<Guid, Guid> IdMap) CreateAssessments<TAssessment>(
+        IEnumerable<TAssessment> assessments,
+        Guid newProjectId) where TAssessment : AssessmentDto
+    {
+        var idMap = new Dictionary<Guid, Guid>();
+        var dtos = assessments.Select(assessment =>
+        {
+            var newId = Guid.NewGuid();
+            idMap[assessment.Id] = newId;
+            return new AssessmentIncomingDto
+            {
+                Id = newId,
+                ProjectId = newProjectId,
+                Name = assessment.Name,
+            };
+        }).ToList();
+        return (dtos, idMap);
+    }
+    private static List<DecisionQualityAssessmentIncomingDto> CreateDecisionQualityAssessments<TDecisionQualityAssessment>(
+        IEnumerable<TDecisionQualityAssessment> decisionQualityAssessments,
+        Dictionary<Guid, Guid> assessmentIdMap,
+        Guid newProjectId) where TDecisionQualityAssessment : DecisionQualityAssessmentDto
+    {
+        return decisionQualityAssessments.Select(decisionQualityAssessment => new DecisionQualityAssessmentIncomingDto
+        {
+            Id = Guid.NewGuid(),
+            AssessmentId = assessmentIdMap.GetValueOrDefault(decisionQualityAssessment.AssessmentId, decisionQualityAssessment.AssessmentId),
+            ProjectId = newProjectId,
+            AppropriateFrame = decisionQualityAssessment.AppropriateFrame,
+            TradeOffAnalysis = decisionQualityAssessment.TradeOffAnalysis,
+            ReasoningCorrectness = decisionQualityAssessment.ReasoningCorrectness,
+            InformationReliability = decisionQualityAssessment.InformationReliability,
+            CommitmentToAction = decisionQualityAssessment.CommitmentToAction,
+            Comment = decisionQualityAssessment.Comment,
+            DoableAlternatives = decisionQualityAssessment.DoableAlternatives
+        }).ToList();
+    }
+
+    private static List<BoardNodeIncomingDto> CreateBoardNodes<TBoardNode>(
+        IEnumerable<TBoardNode> boardNodes,
+        Guid newProjectId,
+        IdMappings mappings) where TBoardNode : BoardNodeDto, ITypedBoardNode
+    {
+        return boardNodes.Select(boardNode => new BoardNodeIncomingDto
+        {
+            Id = Guid.NewGuid(),
+            Type = boardNode.Type,
+            ProjectId = newProjectId,
+            Height = boardNode.Height,
+            Width = boardNode.Width,
+            XPosition = boardNode.XPosition,
+            YPosition = boardNode.YPosition,
+            Rotation = boardNode.Rotation,
+            Data = RemapBoardNodeData(boardNode.Type, boardNode.Data, mappings),
+            Color = boardNode.Color,
+            BoardSheetId = mappings.BoardSheet.GetValueOrDefault(boardNode.BoardSheetId, boardNode.BoardSheetId)
+        }).ToList();
+    }
+
+    private static List<BoardSheetIncomingDto> CreateBoardSheets<TBoardSheet>(
+        IEnumerable<TBoardSheet> boardSheets,
+        Guid newProjectId,
+        IdMappings mappings) where TBoardSheet : BoardSheetDto
+    {
+        return boardSheets.Select(boardSheet =>
+        {
+            var newId = Guid.NewGuid();
+            mappings.BoardSheet[boardSheet.Id] = newId;
+            return new BoardSheetIncomingDto
+            {
+                Id = newId,
+                ProjectId = newProjectId,
+                Name = boardSheet.Name
+            };
+        }).ToList();
+    }
+
+    private static string RemapBoardNodeData(string type, string data, IdMappings mappings)
+    {
+        if (type == nameof(BoardNodeTypes.Issue) && Guid.TryParse(data, out var issueId) && mappings.Issue.TryGetValue(issueId, out var mappedIssueId))
+            return mappedIssueId.ToString();
+        return data;
+    }
+
+    private static List<EdgeIncomingDto> CreateEdges(IEnumerable<EdgeDto> edges, Guid newProjectId, IdMappings mappings)
+    {
+        return edges.Select(edge =>
+        {
+            var newEdgeId = Guid.NewGuid();
+            mappings.Edge[edge.Id] = newEdgeId;
+            return new EdgeIncomingDto
+            {
+                Id = newEdgeId,
+                TailId = GetMappedOrThrow(mappings.Node, edge.TailId, "node"),
+                HeadId = GetMappedOrThrow(mappings.Node, edge.HeadId, "node"),
+                ProjectId = newProjectId
+            };
+        }).ToList();
+    }
+
+    private static List<RestrictionTableIncomingDto> CreateRestrictionTables<TRestrictionTable>(
+        IEnumerable<TRestrictionTable> restrictionTables,
+        Func<TRestrictionTable, IEnumerable<RestrictionEntryDto>> getEntries,
+        Guid newProjectId,
+        IdMappings mappings) where TRestrictionTable : RestrictionTableDto
+    {
+        return restrictionTables.Select(restrictionTable =>
+        {
+            var newRestrictionTableId = Guid.NewGuid();
+            mappings.RestrictionTable[restrictionTable.Id] = newRestrictionTableId;
+            return new RestrictionTableIncomingDto
+            {
+                Id = newRestrictionTableId,
+                ProjectId = newProjectId,
+                EdgeId = GetMappedOrThrow(mappings.Edge, restrictionTable.EdgeId, "edge"),
+                Name = restrictionTable.Name,
+                RestrictionEntries = getEntries(restrictionTable).Select(entry => new RestrictionEntryIncomingDto
+                {
+                    Id = Guid.NewGuid(),
+                    ProjectId = newProjectId,
+                    RestrictionTableId = newRestrictionTableId,
+                    RestrictionValue = entry.RestrictionValue,
+                    IsParentUncertainty = entry.IsParentUncertainty,
+                    IsChildUncertainty = entry.IsChildUncertainty,
+                    ParentStateId = MapRestrictionStateId(entry.ParentStateId, entry.IsParentUncertainty, mappings),
+                    ChildStateId = MapRestrictionStateId(entry.ChildStateId, entry.IsChildUncertainty, mappings)
+                }).ToList()
+            };
+        }).ToList();
+    }
+
+    private static Guid? MapRestrictionStateId(Guid? stateId, bool isUncertainty, IdMappings mappings)
+    {
+        if (stateId is null)
+            return null;
+
+        var map = isUncertainty ? mappings.Outcome : mappings.Option;
+        return map.GetValueOrDefault(stateId.Value, stateId.Value);
+    }
+
+    private static void GenerateIdMappings<TIssue>(
+        IEnumerable<TIssue> issues,
+        Func<TIssue, Guid?> getNodeId,
+        Func<TIssue, (Guid Id, IEnumerable<Guid> OutcomeIds)?> getUncertaintyInfo,
+        Func<TIssue, (Guid Id, IEnumerable<Guid> OptionIds)?> getDecisionInfo,
+        Func<TIssue, Guid?> getUtilityId,
+        IdMappings mappings) where TIssue : IssueDto
+    {
+        foreach (var issue in issues)
+        {
+            mappings.Issue[issue.Id] = Guid.NewGuid();
+
+            var nodeId = getNodeId(issue);
+            if (nodeId.HasValue)
+                mappings.Node[nodeId.Value] = Guid.NewGuid();
+
+            var uncertaintyInfo = getUncertaintyInfo(issue);
+            if (uncertaintyInfo.HasValue)
+            {
+                mappings.Uncertainty[uncertaintyInfo.Value.Id] = Guid.NewGuid();
+                foreach (var outcomeId in uncertaintyInfo.Value.OutcomeIds)
+                    mappings.Outcome[outcomeId] = Guid.NewGuid();
+            }
+
+            var decisionInfo = getDecisionInfo(issue);
+            if (decisionInfo.HasValue)
+            {
+                mappings.Decision[decisionInfo.Value.Id] = Guid.NewGuid();
+                foreach (var optionId in decisionInfo.Value.OptionIds)
+                    mappings.Option[optionId] = Guid.NewGuid();
+            }
+
+            var utilityId = getUtilityId(issue);
+            if (utilityId.HasValue)
+                mappings.Utility[utilityId.Value] = Guid.NewGuid();
+        }
+    }
+
+    private static (List<Guid> ParentOutcomeIds, List<Guid> ParentOptionIds) MapParentIds(
+        List<Guid> parentOutcomeIds,
+        List<Guid> parentOptionIds,
+        IdMappings mappings)
+    {
+        var mappedOutcomeIds = parentOutcomeIds
+            .Where(mappings.Outcome.ContainsKey)
+            .Select(id => mappings.Outcome[id])
+            .ToList();
+
+        var mappedOptionIds = parentOptionIds
+            .Where(mappings.Option.ContainsKey)
+            .Select(id => mappings.Option[id])
+            .ToList();
+
+        return (mappedOutcomeIds, mappedOptionIds);
+    }
+
+    private static Guid GetMappedOrThrow(Dictionary<Guid, Guid> map, Guid key, string mapName)
+    {
+        if (!map.TryGetValue(key, out var value))
+            throw new InvalidOperationException($"Missing {mapName} mapping for id '{key}'.");
+
+        return value;
+    }
+
+    private sealed class IdMappings
+    {
+        public Dictionary<Guid, Guid> Project { get; } = new();
+        public Dictionary<Guid, Guid> Issue { get; } = new();
+        public Dictionary<Guid, Guid> Uncertainty { get; } = new();
+        public Dictionary<Guid, Guid> Decision { get; } = new();
+        public Dictionary<Guid, Guid> Utility { get; } = new();
+        public Dictionary<Guid, Guid> Node { get; } = new();
+        public Dictionary<Guid, Guid> Outcome { get; } = new();
+        public Dictionary<Guid, Guid> Option { get; } = new();
+        public Dictionary<Guid, Guid> BoardSheet { get; } = new();
+        public Dictionary<Guid, Guid> Edge { get; } = new();
+        public Dictionary<Guid, Guid> RestrictionTable { get; } = new();
+    }
+}

@@ -1,0 +1,18 @@
+version: 2
+updates:
+    - package-ecosystem: "npm"
+      directory: "/prisma-ui"
+      schedule:
+          interval: "weekly"
+      open-pull-requests-limit: 20
+    - package-ecosystem: "npm"
+      directory: "/prisma-ui/deployment"
+      schedule:
+          interval: "weekly"
+      open-pull-requests-limit: 20
+    - package-ecosystem: "pip"
+      directory: "/prisma-api/solver"
+      schedule:
+          interval: "weekly"
+      cooldown:
+          default-days: 7
