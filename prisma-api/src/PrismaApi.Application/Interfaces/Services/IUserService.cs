@@ -1,0 +1,13 @@
+using Microsoft.AspNetCore.Http;
+using PrismaApi.Domain.Dtos;
+
+namespace PrismaApi.Application.Interfaces.Services;
+
+public interface IUserService
+{
+    Task<List<UserOutgoingDto>> GetAllAsync();
+    Task<List<UserOutgoingDto>> SearchUsersAsync(string query);
+    Task<UserOutgoingDto> GetOrCreateUserFromContextAsync(HttpContext context);
+    Task<List<UserOutgoingDto>> GetByIdsAsync(IEnumerable<string> ids);
+    Task DeleteUserAsync(string userId, UserOutgoingDto user, CancellationToken ct = default);
+}

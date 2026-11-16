@@ -1,0 +1,69 @@
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useMemo } from 'react';
+import { useForm } from 'react-hook-form';
+import { Objective, objectiveSchema } from '../validators';
+import { useUpdateObjective } from './api/useUpdateObjective';
+import { useCreateObjectiveOptimistic } from './api/useCreateObjective';
+import { useSelectedProject } from '../components/ProjectPage/ProjectContext';
+
+export const useObjectiveForm = (props: UseObjectiveFormArgs) => {
+	const selectedProject = useSelectedProject();
+	const { objective, onSuccess } = props || {};
+
+	const defaultValues = useMemo(
+		() => objective || getDefaultValues(selectedProject.id),
+		[selectedProject.id, objective],
+	);
+
+	const formMethods = useForm({
+		mode: 'onChange',
+		values: defaultValues,
+		resolver: zodResolver(objectiveSchema),
+	});
+
+	const { mutate: createObjective, isPending: isCreating } = useCreateObjectiveOptimistic({
+		onSuccess: () => {
+			const type = formMethods.getValues('type');
+			formMethods.reset({ ...getDefaultValues(selectedProject.id), type });
+			onSuccess?.();
+		},
+	});
+
+	const { mutate: updateObjective, isPending: isUpdating } = useUpdateObjective({
+		onSuccess: onSuccess,
+		scope: objective?.id,
+	});
+
+	const handleSubmit = formMethods.handleSubmit(
+		data => {
+			const mutationFn = objective ? updateObjective : createObjective;
+			return mutationFn({
+				...data,
+			});
+		},
+		errors => {
+			// eslint-disable-next-line no-console
+			console.error('Form errors:', errors);
+		},
+	);
+
+	return {
+		...formMethods,
+		handleSubmit,
+		isPending: isCreating || isUpdating,
+	};
+};
+
+const getDefaultValues = (projectId: string): Objective => ({
+	project_id: projectId,
+	name: '',
+	description: '',
+	type: 'Fundamental',
+	id: crypto.randomUUID(),
+	ordering: 0,
+});
+
+type UseObjectiveFormArgs = {
+	objective?: Objective;
+	onSuccess?: () => void;
+} | void;

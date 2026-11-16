@@ -1,0 +1,13 @@
+using PrismaApi.Domain.Dtos;
+using PrismaApi.Domain.Entities;
+using System.Linq.Expressions;
+
+namespace PrismaApi.Application.Interfaces.Repositories;
+
+public interface IProjectRepository : ICrudRepository<Project, Guid>
+{
+    IQueryable<Project> QueryForProjectOutgoingDto();
+    Task<ICollection<Project>> GetProjectsWhereUserHasAccess(ICollection<Guid> projectIds, string userId, CancellationToken ct = default);
+    Task<int> GetCountWhereUserHasAccess(ICollection<Guid> projectIds, string userId, CancellationToken ct = default);
+    Task<IEnumerable<Project>> UpdateRangeAsync(IEnumerable<Project> incomingEntities, UserOutgoingDto userDto, Expression<Func<Project, bool>> filterPredicate, CancellationToken ct = default);
+}

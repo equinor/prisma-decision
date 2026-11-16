@@ -1,0 +1,146 @@
+apiVersion: radix.equinor.com/v1
+kind: RadixApplication
+metadata:
+  name: prisma-decision-api
+spec:
+  environments:
+    - name: prod
+      build:
+        from: prisma-api-v*
+    - name: test
+      build:
+        from: prisma-api-test-v*
+    - name: dev
+      build:
+        from: main
+  components:
+    - name: api
+      src: ./prisma-api/src
+      ports:
+        - name: http
+          port: 7075
+      publicPort: http
+      resources:
+        requests:
+          memory: '2000Mi'
+          cpu: '200m'
+        limits:
+          memory: '10000Mi'
+          cpu: '1000m'
+        horizontalScaling:
+          resources:
+            memory:
+              averageUtilization: 75
+            cpu:
+              averageUtilization: 85
+          minReplicas: 1
+          maxReplicas: 3
+      environmentConfig:
+        - environment: prod
+          replicas: 1
+          variables:
+            ASPNETCORE_ENVIRONMENT: 'Production'
+          secretRefs:
+            azureKeyVaults:
+                - name: kvprismadecisionprodsw
+                  useAzureIdentity: true
+                  items:
+                      - name: prismadecisionapiprodsec
+                        envVar: CLIENT_SECRET
+                      - name: applicationinsightapiprod
+                        envVar: APPLICATION_INSIGHTS_CONNECTION_STRING
+          identity:
+            azure:
+                clientId: 0301648e-27c7-4bdb-b366-0f9a206028c4
+        - environment: test
+          replicas: 1
+          variables:
+            ASPNETCORE_ENVIRONMENT: 'Test'
+          secretRefs:
+            azureKeyVaults:
+                - name: kvprismadecisiontestsw
+                  useAzureIdentity: true
+                  items:
+                      - name: prismadecisionapiptestsec
+                        envVar: CLIENT_SECRET
+                      - name: applicationinsightapiptest
+                        envVar: APPLICATION_INSIGHTS_CONNECTION_STRING
+          identity:
+            azure:
+              clientId: f3df74ff-7a88-4f51-8ecd-1e3d8a580961
+        - environment: dev
+          replicas: 1
+          variables:
+            ASPNETCORE_ENVIRONMENT: 'Development'
+          secretRefs:
+            azureKeyVaults:
+                - name: kvprismadecisiondevsw
+                  useAzureIdentity: true
+                  items:
+                      - name: prismadecisionapidevsec
+                        envVar: CLIENT_SECRET
+                      - name: applicationinsightapidev
+                        envVar: APPLICATION_INSIGHTS_CONNECTION_STRING
+          identity:
+            azure:
+              clientId: 0e69d773-2ad4-4918-a22c-e7df52e3ab7a
+
+    - name: fastapi
+      src: ./prisma-api/solver
+      ports:
+        - name: http
+          port: 8000
+      resources:
+        requests:
+          memory: '10000Mi'
+          cpu: '200m'
+        limits:
+          memory: '10000Mi'
+          cpu: '1000m'
+        horizontalScaling:
+          resources:
+            memory:
+              averageUtilization: 75
+            cpu:
+              averageUtilization: 85
+          minReplicas: 1
+          maxReplicas: 3
+      environmentConfig:
+        - environment: prod
+          replicas: 1
+          secretRefs:
+            azureKeyVaults:
+                - name: kvprismadecisionprodsw
+                  useAzureIdentity: true
+                  items:
+                      - name: applicationinsightapiprod
+                        envVar: APPLICATION_INSIGHTS_CONNECTION_STRING
+          identity:
+            azure:
+              clientId: 0301648e-27c7-4bdb-b366-0f9a206028c4
+
+        - environment: test
+          replicas: 1
+          secretRefs:
+            azureKeyVaults:
+                - name: kvprismadecisiontestsw
+                  useAzureIdentity: true
+                  items:
+                      - name: applicationinsightapitest
+                        envVar: APPLICATION_INSIGHTS_CONNECTION_STRING
+          identity:
+            azure:
+              clientId: f3df74ff-7a88-4f51-8ecd-1e3d8a580961
+
+        - environment: dev
+          replicas: 1
+          secretRefs:
+            azureKeyVaults:
+                - name: kvprismadecisiondevsw
+                  useAzureIdentity: true
+                  items:
+                      - name: applicationinsightapidev
+                        envVar: APPLICATION_INSIGHTS_CONNECTION_STRING
+          identity:
+            azure:
+              clientId: 0e69d773-2ad4-4918-a22c-e7df52e3ab7a

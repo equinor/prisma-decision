@@ -1,0 +1,100 @@
+import { EdsProvider, Popover, Table } from '@equinor/eds-core-react';
+import { Button, Icon } from '@equinor/eds-core-react/next';
+import { info_circle } from '@equinor/eds-icons';
+import { useState } from 'react';
+import { Issue } from '../../../../validators';
+import { BoundaryLabel } from '../../../common/Cards/BoundaryLabel';
+import { DecisionLabel, UncertaintyLabel } from '../../../common/Cards/IssueTypeLabel';
+import { IssueRow } from './IssueRow';
+
+export const IssuesInDiagramTable = ({
+	issues: projectIssues,
+	highlightedIssueIds,
+}: {
+	issues: Issue[];
+	highlightedIssueIds?: ReadonlySet<string>;
+}) => {
+	const [isOpen, setIsOpen] = useState(false);
+	const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+
+	const issues = projectIssues.filter(issue => {
+		const inOrOnBoundary = issue.boundary === 'in' || issue.boundary === 'on';
+		if (issue.type === 'Decision') return inOrOnBoundary && issue.decision.type === 'Focus';
+		if (issue.type === 'Uncertainty') return inOrOnBoundary && issue.uncertainty.is_key;
+		if (issue.type === 'Utility') return inOrOnBoundary;
+		return false;
+	});
+
+	const hasIssues = issues.length > 0;
+	if (!hasIssues) return;
+	return (
+		<div className='flex flex-col gap-2'>
+			<EdsProvider density='comfortable'>
+				<div className='flex items-center gap-2'>
+					<p>Issues used in the influence diagram</p>
+					<Button
+						variant='ghost'
+						size='small'
+						icon
+						aria-label='About issues used in the influence diagram'
+						ref={setAnchorEl}
+						onClick={() => setIsOpen(true)}
+					>
+						<Icon data={info_circle} />
+					</Button>
+					<Popover open={isOpen} anchorEl={anchorEl} onClose={() => setIsOpen(false)}>
+						<Popover.Content className='flex flex-col gap-2'>
+							<h5 className='text-text-secondary text-[10px] font-medium tracking-[1.1px]'>
+								ISSUES USED
+							</h5>
+							<div className='flex items-center gap-2'>
+								<p className='text-sm font-medium'>Type:</p>
+								<UncertaintyLabel />
+								<p className='text-sm font-medium'>and</p>
+								<p className='text-sm font-medium'>Is Key</p>
+							</div>
+							<div className='flex items-center gap-2'>
+								<p className='text-sm font-medium'>Type:</p>
+								<DecisionLabel />
+								<p className='text-sm font-medium'>and</p>
+								<p className='text-sm font-medium'>Focus</p>
+							</div>
+							<div className='flex items-center gap-2'>
+								<p className='text-sm font-medium'>Boundary:</p>
+								<BoundaryLabel boundary='in' />
+								<p className='text-sm font-medium'>or</p>
+								<BoundaryLabel boundary='on' />
+							</div>
+						</Popover.Content>
+					</Popover>
+				</div>
+				<div className='outline-background-medium w-full overflow-auto rounded-sm outline-1'>
+					<Table className='w-full' aria-label='Issues used in the influence diagram'>
+						<Table.Head>
+							<Table.Row>
+								<Table.Cell className='w-21 pl-1!'></Table.Cell>
+								<Table.Cell className='min-w-48'>Name</Table.Cell>
+								<Table.Cell className='w-337.5'>Description</Table.Cell>
+								<Table.Cell className='w-24'>Outcomes/&#10;&#13;Options</Table.Cell>
+								<Table.Cell className='w-30'>Issue Type</Table.Cell>
+								<Table.Cell className='w-34 whitespace-nowrap'>
+									Decision type / Key
+								</Table.Cell>
+								<Table.Cell className='w-12'>Boundary</Table.Cell>
+							</Table.Row>
+						</Table.Head>
+						<Table.Body>
+							{issues.map(issue => (
+								<IssueRow
+									key={issue.id}
+									issue={issue}
+									highlighted={highlightedIssueIds?.has(issue.id)}
+								/>
+							))}
+						</Table.Body>
+					</Table>
+				</div>
+			</EdsProvider>
+		</div>
+	);
+};

@@ -1,0 +1,63 @@
+import { useState } from 'react';
+import { useSelectedProjectStrategies } from '../../../hooks/useSelectedProjectStrategies';
+import { LoadingSpinner } from '../../common/LoadingSpinner';
+import { CreateStrategy } from './CreateStrategy';
+import { Strategy } from './Strategy';
+import { StrategyTable } from './StrategyTable';
+import { useSelectedProject } from '../ProjectContext';
+
+export const Strategies = () => {
+	const selectedProject = useSelectedProject();
+	const { selectedStrategies, isLoading } = useSelectedProjectStrategies();
+	const [hiddenStrategyIds, setHiddenStrategyIds] = useState<Set<string>>(new Set());
+
+	const handleClickAddToStrategyTable = (id: string) => {
+		if (hiddenStrategyIds.has(id)) {
+			setHiddenStrategyIds(prev => {
+				const newSet = new Set(prev);
+				newSet.delete(id);
+				return newSet;
+			});
+		} else {
+			setHiddenStrategyIds(prev => {
+				const newSet = new Set(prev);
+				newSet.add(id);
+				return newSet;
+			});
+		}
+	};
+	const strategiesToCompare = selectedStrategies.filter(s => !hiddenStrategyIds.has(s.id)) ?? [];
+	if (isLoading) return <LoadingSpinner />;
+	return (
+		<div className='flex flex-col gap-4'>
+			<div className='w-full'>
+				<h1 className='truncate text-3xl font-bold'>{selectedProject.name}</h1>
+			</div>
+			{selectedStrategies.length > 0 && <StrategyTable strategies={strategiesToCompare} />}
+			<div
+				className='bg-background-default shadow-tile flex w-full flex-col
+            	items-start gap-4 rounded-sm p-4'
+			>
+				<div className='grid w-full items-center gap-4 text-start xl:grid-cols-[auto_1fr]'>
+					<div className='flex gap-2'>
+						<h2 className='text-2xl font-semibold'>Strategies</h2>
+						<span className='bg-background-light flex w-8 items-center justify-center rounded-full'>
+							{selectedStrategies.length ?? 0}
+						</span>
+					</div>
+					<CreateStrategy />
+				</div>
+				{selectedStrategies.map(strategy => {
+					return (
+						<Strategy
+							key={strategy.id}
+							strategy={strategy}
+							hiddenStrategyIds={hiddenStrategyIds}
+							onClickAddToStrategyTable={handleClickAddToStrategyTable}
+						/>
+					);
+				})}
+			</div>
+		</div>
+	);
+};

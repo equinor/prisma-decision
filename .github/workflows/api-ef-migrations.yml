@@ -1,0 +1,103 @@
+name: Apply EF Core migrations
+
+on:
+    push:
+        branches:
+            - main
+        paths:
+            - "prisma-api/src/SqlServerMigrations/**"
+        tags:
+            - "prisma-api-test-v*" # migrates test alongside the Radix test deployment
+            - "PUBLIC" # migrates public alongside the Radix public deployment
+    workflow_dispatch:
+        inputs:
+            env-name:
+                description: Environment to migrate
+                type: choice
+                options: [Development, Test]
+                default: Development
+    workflow_call:
+        inputs:
+            env-name:
+                type: string
+                default: Development
+
+permissions: {}
+
+jobs:
+    run-migration:
+        runs-on: ubuntu-latest
+        permissions:
+            id-token: write
+            contents: read
+        # Prod is migrated from release-please.yml when a prisma-api release is created.
+        # The GitHub environment holds AZURE_CLIENT_ID, AZURE_TENANT_ID, AZURE_SUBSCRIPTION_ID,
+        # AZURE_RESOURCE_GROUP and AZURE_SQL_SERVER_NAME.
+        environment: ${{ inputs.env-name || (startsWith(github.ref, 'refs/tags/prisma-api-test-v') && 'Test') || (github.ref == 'refs/tags/PUBLIC' && 'Public') || 'Development' }}
+        steps:
+            - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+              with:
+                  persist-credentials: false
+
+            - name: Install Azure CLI
+              run: |
+                  curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+
+            - name: OIDC Login to Azure Public Cloud with AzPowershell (enableAzPSSession true)
+              uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5 # v2.3.0
+              with:
+                  client-id: ${{ secrets.AZURE_CLIENT_ID }}
+                  tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+                  subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+                  enable-AzPSSession: true
+
+            - name: Get IP Address
+              id: get_ip
+              run: |
+                  echo "ip=$(curl -s ifconfig.me)" >> $GITHUB_OUTPUT
+
+            - name: Add Firewall Rule
+              env:
+                  RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
+                  SQL_SERVER_NAME: ${{ secrets.AZURE_SQL_SERVER_NAME }}
+                  SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+                  RUNNER_IP: ${{ steps.get_ip.outputs.ip }}
+              run: |
+                  az sql server firewall-rule create \
+                    --resource-group "${RESOURCE_GROUP}" \
+                    --server "${SQL_SERVER_NAME}" \
+                    --name AllowGitHubActionsIP \
+                    --start-ip-address "${RUNNER_IP}" \
+                    --end-ip-address "${RUNNER_IP}" \
+                    --subscription "${SUBSCRIPTION_ID}"
+
+            - name: Set up .NET
+              uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4.3.1
+              with:
+                  dotnet-version: "10.0.x"
+
+            - name: Install EF Core tools
+              run: dotnet tool install --global dotnet-ef
+
+            - name: Restore NuGet packages
+              working-directory: prisma-api/src
+              run: dotnet restore PrismaApi.sln
+
+            - name: Run migration
+              working-directory: prisma-api/src
+              env:
+                  ASPNETCORE_ENVIRONMENT: ${{ inputs.env-name || (startsWith(github.ref, 'refs/tags/prisma-api-test-v') && 'Test') || (github.ref == 'refs/tags/PUBLIC' && 'Public') || 'Development' }}
+              run: |
+                  dotnet ef database update --project ./SqlServerMigrations/SqlServerMigrations.csproj --startup-project ./PrismaApi.Api/PrismaApi.Api.csproj -- --provider=sqlserver
+
+            - name: Remove Firewall Rule
+              env:
+                  RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
+                  SQL_SERVER_NAME: ${{ secrets.AZURE_SQL_SERVER_NAME }}
+                  SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+              run: |
+                  az sql server firewall-rule delete \
+                    --resource-group "${RESOURCE_GROUP}" \
+                    --server "${SQL_SERVER_NAME}" \
+                    --name AllowGitHubActionsIP \
+                    --subscription "${SUBSCRIPTION_ID}"

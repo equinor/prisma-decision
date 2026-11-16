@@ -1,0 +1,86 @@
+apiVersion: radix.equinor.com/v1
+kind: RadixApplication
+metadata:
+  name: prisma-decision-api-public
+spec:
+  environments:
+    - name: public
+      build:
+        from: PUBLIC
+    - name: design
+      build:
+        from: DESIGN
+  components:
+    - name: api
+      src: ./prisma-api/src
+      ports:
+        - name: http
+          port: 7075
+      publicPort: http
+      resources:
+        requests:
+          memory: '2000Mi'
+          cpu: '200m'
+        limits:
+          memory: '10000Mi'
+          cpu: '1000m'
+        horizontalScaling:
+          resources:
+            memory:
+              averageUtilization: 75
+            cpu:
+              averageUtilization: 85
+          minReplicas: 1
+          maxReplicas: 3
+      environmentConfig:
+        - environment: public
+          replicas: 1
+          variables:
+            ASPNETCORE_ENVIRONMENT: 'Public'
+          secretRefs:
+            azureKeyVaults:
+                - name: kvprismadecisionpublicsw
+                  useAzureIdentity: true
+                  items:
+                      - name: applicationinsightapipublic
+                        envVar: APPLICATION_INSIGHTS_CONNECTIONSTRING
+          identity:
+            azure:
+                clientId: 519d9a9d-de73-4352-a9ea-f278317c8b75
+        - environment: design
+          replicas: 1
+          variables:
+            ASPNETCORE_ENVIRONMENT: 'Public'
+          secretRefs:
+            azureKeyVaults:
+                - name: kvprismadecisionpublicsw
+                  useAzureIdentity: true
+                  items:
+                      - name: applicationinsightapipublic
+                        envVar: APPLICATION_INSIGHTS_CONNECTIONSTRING
+          identity:
+            azure:
+                clientId: 519d9a9d-de73-4352-a9ea-f278317c8b75
+    - name: fastapi
+      src: ./prisma-api/solver
+      ports:
+        - name: http
+          port: 8000
+      resources:
+        requests:
+          memory: '2000Mi'
+          cpu: '200m'
+        limits:
+          memory: '10000Mi'
+          cpu: '1000m'
+        horizontalScaling:
+          resources:
+            memory:
+              averageUtilization: 75
+            cpu:
+              averageUtilization: 85
+          minReplicas: 1
+          maxReplicas: 3
+      environmentConfig:
+        - environment: public
+          replicas: 1
