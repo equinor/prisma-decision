@@ -151,7 +151,7 @@ test('List issue type menu checks the saved value and dismisses without saving',
 	expect(apiClient.put).not.toHaveBeenCalled();
 });
 
-test('List keeps state counts and full Edit uses its existing non-optimistic save behavior', async () => {
+test('List keeps state counts and shows a full Edit rename before the server responds', async () => {
 	let finish!: () => void;
 	vi.mocked(apiClient.put).mockImplementation(
 		async (_url, data) =>
@@ -175,11 +175,11 @@ test('List keeps state counts and full Edit uses its existing non-optimistic sav
 	await waitFor(() => expect(apiClient.put).toHaveBeenCalledTimes(1));
 	// The open sheet hides the List from the accessibility tree.
 	expect(
-		screen.getByRole('button', { name: 'Edit issue: Drill well', hidden: true }),
+		screen.getByRole('button', { name: 'Edit issue: Renamed issue', hidden: true }),
 	).toBeInTheDocument();
 	await act(async () => finish());
 	expect(
-		await screen.findByRole('button', { name: 'Edit issue: Renamed issue', hidden: true }),
+		screen.getByRole('button', { name: 'Edit issue: Renamed issue', hidden: true }),
 	).toBeInTheDocument();
 });
 

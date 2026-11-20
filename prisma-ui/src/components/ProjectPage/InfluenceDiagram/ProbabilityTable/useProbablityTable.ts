@@ -7,18 +7,24 @@ import {
 	getRestrictedProbabilityIds,
 } from '../../../../utils/getProbabilityRestrictions';
 import { sortByCreatedAt } from '../../../../utils/sortByCreatedAt';
-import { Issue } from '../../../../validators';
+import { DiscreteProbability, Issue } from '../../../../validators';
 import { useGetProbabilityTables } from '../../../../hooks/api/useGetProbabilityTables';
 import { getDiscreteValueRows } from '../ConditionalTable/getDiscreteValueRows';
 
-export const useProbablityTable = (issue: Issue) => {
+/**
+ * Rows for an Uncertainty's Probability table. Pass `probabilities` to show cells other than the
+ * cached ones, such as a draft Table shape.
+ */
+export const useProbablityTable = (issue: Issue, probabilities?: DiscreteProbability[]) => {
 	const issues = useSelectedProjectIssues();
 	const { edges } = useSelectedProjectEdges();
 	const { restrictionTables } = useSelectedProjectRestrictionTables();
 	const childOutcomes = sortByCreatedAt(issue.uncertainty.outcomes);
 	const { data: probabilityTables } = useGetProbabilityTables();
 	const discreteProbabilities =
-		probabilityTables.find(pt => pt.issue_id === issue.id)?.discrete_probabilities || [];
+		probabilities ??
+		probabilityTables.find(pt => pt.issue_id === issue.id)?.discrete_probabilities ??
+		[];
 	const restrictedEntries = useMemo(
 		() => getRestrictedEntriesForTargetNode(issue.node.id, edges, restrictionTables),
 		[edges, issue.node.id, restrictionTables],
