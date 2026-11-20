@@ -1,8 +1,7 @@
 name: UI CI
 on:
+    # Every target branch, so stacked PRs are checked too.
     pull_request:
-        branches:
-            - main
         types:
             - opened
             - edited
@@ -55,3 +54,16 @@ jobs:
                   cache-dependency-path: prisma-ui/package-lock.json
             - run: npm ci
             - run: npm run prettier
+    test:
+        runs-on: ubuntu-latest
+        name: Run vitest
+        timeout-minutes: 20
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: lts/*
+                  cache: npm
+                  cache-dependency-path: prisma-ui/package-lock.json
+            - run: npm ci
+            - run: npm test

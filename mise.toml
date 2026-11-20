@@ -114,6 +114,7 @@ run = [
   "npm --prefix prisma-ui run lint",
   "npm --prefix prisma-ui run tsc",
   "npm --prefix prisma-ui run prettier",
+  "npm --prefix prisma-ui test",
 ]
 
 [tasks.test]

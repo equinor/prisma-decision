@@ -58,12 +58,13 @@ test('Shape menus support keyboard activation, replace each other, dismiss, and 
 	decisionActions.focus();
 	await user.keyboard('{Enter}');
 	expect(await screen.findByRole('menu', { name: 'Issue actions: Drill well' })).toBeVisible();
-	expect(screen.getByRole('menuitem', { name: 'Edit' })).toHaveFocus();
+	// EDS focuses the active menu item in an animation frame.
+	await waitFor(() => expect(screen.getByRole('menuitem', { name: 'Edit' })).toHaveFocus());
 	await user.keyboard('{ArrowDown}');
-	expect(screen.getByRole('menuitem', { name: 'Delete' })).toHaveFocus();
+	await waitFor(() => expect(screen.getByRole('menuitem', { name: 'Delete' })).toHaveFocus());
 	await user.keyboard('{Escape}');
 	await waitFor(() => expect(screen.queryByRole('menu')).toBeNull());
-	expect(decisionActions).toHaveFocus();
+	await waitFor(() => expect(decisionActions).toHaveFocus());
 
 	await user.click(decisionActions);
 	await user.click(within(uncertainty).getByRole('button', { name: 'Issue actions' }));

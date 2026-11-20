@@ -62,7 +62,7 @@ test('matches the issue quick-create layout', () => {
 		'placeholder',
 		'Rationale (required)',
 	);
-	expect(screen.getByLabelText('Strategy icon color')).toBeInTheDocument();
+	expect(screen.getByLabelText('Choose strategy icon color')).toBeInTheDocument();
 	expect(screen.getByRole('button', { name: 'Strategy icon' })).toBeInTheDocument();
 	expect(screen.getByRole('button', { name: 'Create strategy' })).toBeInTheDocument();
 	expect(screen.queryByRole('button', { name: 'Create Strategy' })).not.toBeInTheDocument();
