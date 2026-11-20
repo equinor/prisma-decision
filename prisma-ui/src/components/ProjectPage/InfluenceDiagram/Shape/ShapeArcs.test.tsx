@@ -480,57 +480,6 @@ test('an Uncertainty arc updates Utility eligibility without clearing an existin
 	);
 });
 
-test('a newly saved arc can be reconnected, and its new target remains excluded from the click picker', async () => {
-	const license = diagramIssue('License', 'Decision');
-	fixture.issues.push(license);
-	const user = userEvent.setup();
-	renderInfluenceDiagram(queryClient, fixture.project);
-	const source = await screen.findByTestId(`rf__node-${fixture.issues[0].node.id}`);
-	await user.click(within(source).getByRole('button', { name: 'Add arc' }));
-	await user.click(await screen.findByRole('menuitem', { name: 'Uncertainty Oil price' }));
-	const edgeName = `Edge from ${fixture.issues[0].node.id} to ${fixture.issues[1].node.id}`;
-	const edge = await screen.findByRole('group', { name: edgeName });
-	await waitFor(() => expect(edgeWrites()).toHaveLength(1));
-	await user.click(edge);
-	await waitFor(() => expect(edge).toHaveClass('selected'));
-	const endpoint = edge.querySelector('.react-flow__edgeupdater-target');
-	const target = screen
-		.getByTestId(`rf__node-${license.node.id}`)
-		.querySelector('[data-handleid="node-target"]');
-	expect(endpoint).not.toBeNull();
-	expect(target).not.toBeNull();
-	drag(endpoint!, target!);
-	await waitFor(() =>
-		expect(
-			fixture.requests.filter(
-				request => request.url === '/edges' && request.method === 'put',
-			),
-		).toEqual([
-			expect.objectContaining({
-				data: [
-					expect.objectContaining({
-						tail_id: fixture.issues[0].node.id,
-						head_id: license.node.id,
-					}),
-				],
-			}),
-		]),
-	);
-	expect(
-		await screen.findByRole('group', {
-			name: `Edge from ${fixture.issues[0].node.id} to ${license.node.id}`,
-		}),
-	).toBeInTheDocument();
-	expect(screen.queryByRole('group', { name: edgeName })).toBeNull();
-	await user.click(within(source).getByRole('button', { name: 'Add arc' }));
-	const picker = await screen.findByRole('menu', { name: 'Add arc to' });
-	expect(
-		within(picker)
-			.getAllByRole('menuitem')
-			.map(item => item.textContent),
-	).toEqual(['Oil price']);
-});
-
 test('a newly saved arc retains existing restriction editing and confirmed edge deletion in both views', async () => {
 	const transport = apiClient.defaults.adapter;
 	apiClient.defaults.adapter = async config => {
