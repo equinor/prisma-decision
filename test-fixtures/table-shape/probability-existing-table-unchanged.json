@@ -1,0 +1,158 @@
+{
+	"description": "A table already in shape keeps its cell IDs and values.",
+	"input": {
+		"issues": [
+			{
+				"id": "8e90bbae-50ea-484a-bddc-f6f7090b565d",
+				"project_id": "35da60df-8e69-46d6-bafb-6207e325918d",
+				"type": "Decision",
+				"boundary": "on",
+				"node": {
+					"id": "ddbc99ad-4a7f-4178-9d6f-6ca0e5df4d14"
+				},
+				"uncertainty": null,
+				"decision": {
+					"id": "25011b4f-cc19-4cb9-8426-708a571a7586",
+					"type": "Focus",
+					"options": [
+						{
+							"id": "f2485ae9-7188-478d-8d47-b3c2cd88bc29"
+						},
+						{
+							"id": "ab5a7235-5e39-412b-a13e-30e6600c6404"
+						}
+					]
+				},
+				"utility": null
+			},
+			{
+				"id": "c01b7d16-a02e-446f-a260-2192e6b4ebe9",
+				"project_id": "35da60df-8e69-46d6-bafb-6207e325918d",
+				"type": "Uncertainty",
+				"boundary": "in",
+				"node": {
+					"id": "f0e29dbd-5541-4ea2-a754-3bcd4490978f"
+				},
+				"uncertainty": {
+					"id": "62368202-db3c-43e0-9a65-fb07f651865f",
+					"is_key": true,
+					"outcomes": [
+						{
+							"id": "4c4c0670-b200-4cc6-b671-c68aa4bda02f"
+						},
+						{
+							"id": "84f069f1-498e-4005-9610-43ba83c994e3"
+						}
+					]
+				},
+				"decision": null,
+				"utility": null
+			}
+		],
+		"edges": [
+			{
+				"id": "ae56213d-1c47-4059-b3c5-0fd4e5262a16",
+				"tail_id": "ddbc99ad-4a7f-4178-9d6f-6ca0e5df4d14",
+				"head_id": "f0e29dbd-5541-4ea2-a754-3bcd4490978f"
+			}
+		],
+		"discrete_probabilities": [
+			{
+				"id": "420cf8eb-6296-45a7-9ed8-df0be6e92fef",
+				"outcome_id": "4c4c0670-b200-4cc6-b671-c68aa4bda02f",
+				"uncertainty_id": "62368202-db3c-43e0-9a65-fb07f651865f",
+				"project_id": "35da60df-8e69-46d6-bafb-6207e325918d",
+				"probability": 0.25,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"f2485ae9-7188-478d-8d47-b3c2cd88bc29"
+				]
+			},
+			{
+				"id": "0d27cfb6-0d41-4791-9d60-9b6b9d0c59b9",
+				"outcome_id": "84f069f1-498e-4005-9610-43ba83c994e3",
+				"uncertainty_id": "62368202-db3c-43e0-9a65-fb07f651865f",
+				"project_id": "35da60df-8e69-46d6-bafb-6207e325918d",
+				"probability": 0.5,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"f2485ae9-7188-478d-8d47-b3c2cd88bc29"
+				]
+			},
+			{
+				"id": "fcf5df66-7cc6-41a6-872e-7544c76fdcb1",
+				"outcome_id": "4c4c0670-b200-4cc6-b671-c68aa4bda02f",
+				"uncertainty_id": "62368202-db3c-43e0-9a65-fb07f651865f",
+				"project_id": "35da60df-8e69-46d6-bafb-6207e325918d",
+				"probability": 0.125,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"ab5a7235-5e39-412b-a13e-30e6600c6404"
+				]
+			},
+			{
+				"id": "2cdb3977-64f9-4964-9eb9-171065f4ffd0",
+				"outcome_id": "84f069f1-498e-4005-9610-43ba83c994e3",
+				"uncertainty_id": "62368202-db3c-43e0-9a65-fb07f651865f",
+				"project_id": "35da60df-8e69-46d6-bafb-6207e325918d",
+				"probability": 0.375,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"ab5a7235-5e39-412b-a13e-30e6600c6404"
+				]
+			}
+		],
+		"discrete_utilities": [],
+		"restriction_tables": []
+	},
+	"expected": {
+		"discrete_probabilities": [
+			{
+				"id": "0d27cfb6-0d41-4791-9d60-9b6b9d0c59b9",
+				"outcome_id": "84f069f1-498e-4005-9610-43ba83c994e3",
+				"uncertainty_id": "62368202-db3c-43e0-9a65-fb07f651865f",
+				"project_id": "35da60df-8e69-46d6-bafb-6207e325918d",
+				"probability": 0.5,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"f2485ae9-7188-478d-8d47-b3c2cd88bc29"
+				]
+			},
+			{
+				"id": "2cdb3977-64f9-4964-9eb9-171065f4ffd0",
+				"outcome_id": "84f069f1-498e-4005-9610-43ba83c994e3",
+				"uncertainty_id": "62368202-db3c-43e0-9a65-fb07f651865f",
+				"project_id": "35da60df-8e69-46d6-bafb-6207e325918d",
+				"probability": 0.375,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"ab5a7235-5e39-412b-a13e-30e6600c6404"
+				]
+			},
+			{
+				"id": "420cf8eb-6296-45a7-9ed8-df0be6e92fef",
+				"outcome_id": "4c4c0670-b200-4cc6-b671-c68aa4bda02f",
+				"uncertainty_id": "62368202-db3c-43e0-9a65-fb07f651865f",
+				"project_id": "35da60df-8e69-46d6-bafb-6207e325918d",
+				"probability": 0.25,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"f2485ae9-7188-478d-8d47-b3c2cd88bc29"
+				]
+			},
+			{
+				"id": "fcf5df66-7cc6-41a6-872e-7544c76fdcb1",
+				"outcome_id": "4c4c0670-b200-4cc6-b671-c68aa4bda02f",
+				"uncertainty_id": "62368202-db3c-43e0-9a65-fb07f651865f",
+				"project_id": "35da60df-8e69-46d6-bafb-6207e325918d",
+				"probability": 0.125,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"ab5a7235-5e39-412b-a13e-30e6600c6404"
+				]
+			}
+		],
+		"discrete_utilities": [],
+		"restriction_tables": []
+	}
+}

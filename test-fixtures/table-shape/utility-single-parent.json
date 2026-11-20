@@ -1,0 +1,96 @@
+{
+	"description": "A Utility with one Parent gets one cell per Parent State.",
+	"input": {
+		"issues": [
+			{
+				"id": "7717ff71-83fc-4d77-a809-7cbd4ac9ffa1",
+				"project_id": "2514eca8-f4ed-40a2-ab13-492d79bd973f",
+				"type": "Decision",
+				"boundary": "on",
+				"node": {
+					"id": "8961c4c3-17ca-4dc8-895a-2a894f48a42b"
+				},
+				"uncertainty": null,
+				"decision": {
+					"id": "8f9cd267-4a6b-4f80-ad30-cf49568e5238",
+					"type": "Focus",
+					"options": [
+						{
+							"id": "2f450189-b52b-4e41-99ab-f467d36a3ea6"
+						},
+						{
+							"id": "d78db97b-f65c-45df-b8d6-6f48d0e29a32"
+						},
+						{
+							"id": "b295a1b0-a053-4dff-90e3-7c05e504e374"
+						}
+					]
+				},
+				"utility": null
+			},
+			{
+				"id": "1a6ab285-09b8-4b0b-9550-f7612ead54e6",
+				"project_id": "2514eca8-f4ed-40a2-ab13-492d79bd973f",
+				"type": "Utility",
+				"boundary": "in",
+				"node": {
+					"id": "79cee4ce-bc90-4861-9b9f-3cced79bd541"
+				},
+				"uncertainty": null,
+				"decision": null,
+				"utility": {
+					"id": "53ad8dac-d900-4c8f-9353-4817cef29390"
+				}
+			}
+		],
+		"edges": [
+			{
+				"id": "eb130145-009c-45e7-9b88-fb84b1a919d3",
+				"tail_id": "8961c4c3-17ca-4dc8-895a-2a894f48a42b",
+				"head_id": "79cee4ce-bc90-4861-9b9f-3cced79bd541"
+			}
+		],
+		"discrete_probabilities": [],
+		"discrete_utilities": [],
+		"restriction_tables": []
+	},
+	"expected": {
+		"discrete_probabilities": [],
+		"discrete_utilities": [
+			{
+				"id": "8c1cdbe1-3929-9b4f-a254-07c7f55b7fc2",
+				"value_metric_id": "288e0811-7ab6-5d24-b80c-9fa925b848a6",
+				"utility_id": "53ad8dac-d900-4c8f-9353-4817cef29390",
+				"utility_value": 0,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"b295a1b0-a053-4dff-90e3-7c05e504e374"
+				],
+				"project_id": "2514eca8-f4ed-40a2-ab13-492d79bd973f"
+			},
+			{
+				"id": "ce4e1849-5e82-5463-9f6a-a4b2b6854446",
+				"value_metric_id": "288e0811-7ab6-5d24-b80c-9fa925b848a6",
+				"utility_id": "53ad8dac-d900-4c8f-9353-4817cef29390",
+				"utility_value": 0,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"d78db97b-f65c-45df-b8d6-6f48d0e29a32"
+				],
+				"project_id": "2514eca8-f4ed-40a2-ab13-492d79bd973f"
+			},
+			{
+				"id": "e65dfa7f-571d-33a7-94b5-026a906cd2dc",
+				"value_metric_id": "288e0811-7ab6-5d24-b80c-9fa925b848a6",
+				"utility_id": "53ad8dac-d900-4c8f-9353-4817cef29390",
+				"utility_value": 0,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"2f450189-b52b-4e41-99ab-f467d36a3ea6"
+				],
+				"project_id": "2514eca8-f4ed-40a2-ab13-492d79bd973f"
+			}
+		],
+		"restriction_tables": []
+	}
+}

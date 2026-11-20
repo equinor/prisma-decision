@@ -117,6 +117,13 @@ run = [
   "npm --prefix prisma-ui test",
 ]
 
+[tasks."test:parity"]
+description = "Run the shared Table shape fixtures against the API and UI implementations"
+run = [
+  "dotnet test prisma-api/src/PrismaApi.Test/PrismaApi.Test.csproj --filter FullyQualifiedName~PrismaApi.Test.TableShapes",
+  "npm --prefix prisma-ui test -- src/utils/tableShapes",
+]
+
 [tasks.test]
 description = "Run API, solver and UI tests"
 run = [
