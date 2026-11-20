@@ -1,0 +1,388 @@
+{
+	"description": "A new State on one of two Parents adds rows with value 0 while other rows keep their values.",
+	"input": {
+		"issues": [
+			{
+				"id": "3852a8a4-2720-41d0-ab98-d0916d8a7d3e",
+				"project_id": "a842f092-01c9-4cd7-a226-955e0adce01f",
+				"type": "Decision",
+				"boundary": "on",
+				"node": {
+					"id": "c1ab8f5b-3c52-49e4-a8df-e60121c3fe9b"
+				},
+				"uncertainty": null,
+				"decision": {
+					"id": "00e172c6-1200-45c7-b604-6e64d1d5249b",
+					"type": "Focus",
+					"options": [
+						{
+							"id": "cd77962a-afb4-48be-bdec-d258deb0d294"
+						},
+						{
+							"id": "cdd4d6ab-d048-4741-a558-766f55db232d"
+						}
+					]
+				},
+				"utility": null
+			},
+			{
+				"id": "fde83c1f-5ad3-4240-b0ab-e46c1bb349c7",
+				"project_id": "a842f092-01c9-4cd7-a226-955e0adce01f",
+				"type": "Uncertainty",
+				"boundary": "in",
+				"node": {
+					"id": "53b72d72-f151-45e4-9f02-c514a90a1bf0"
+				},
+				"uncertainty": {
+					"id": "bcb27156-0dd7-4990-91a6-bc8d872f4974",
+					"is_key": true,
+					"outcomes": [
+						{
+							"id": "a07172bc-6f9e-45ba-ae3f-79fcc11ed261"
+						},
+						{
+							"id": "e29f83fa-1691-4d3e-81f5-8b161fdc35a9"
+						},
+						{
+							"id": "3d88d864-6c06-44b2-994d-22d45a3ead5a"
+						}
+					]
+				},
+				"decision": null,
+				"utility": null
+			},
+			{
+				"id": "63b49354-428d-4929-a82d-6f9af5240615",
+				"project_id": "a842f092-01c9-4cd7-a226-955e0adce01f",
+				"type": "Uncertainty",
+				"boundary": "in",
+				"node": {
+					"id": "56c53e34-a76b-4d05-a508-95ec2890043f"
+				},
+				"uncertainty": {
+					"id": "0dc891fc-a546-4b0b-b787-49d731d4a45e",
+					"is_key": true,
+					"outcomes": [
+						{
+							"id": "1adea7f4-b7a2-4662-9141-920f45be470f"
+						},
+						{
+							"id": "4baf5cfd-c9b3-4693-b6a5-2e9207aa867b"
+						}
+					]
+				},
+				"decision": null,
+				"utility": null
+			}
+		],
+		"edges": [
+			{
+				"id": "7170106d-3d21-4295-a420-527406d5d0cf",
+				"tail_id": "c1ab8f5b-3c52-49e4-a8df-e60121c3fe9b",
+				"head_id": "56c53e34-a76b-4d05-a508-95ec2890043f"
+			},
+			{
+				"id": "f2ee6599-e3e8-4c0d-a077-b47c9297bcee",
+				"tail_id": "53b72d72-f151-45e4-9f02-c514a90a1bf0",
+				"head_id": "56c53e34-a76b-4d05-a508-95ec2890043f"
+			}
+		],
+		"discrete_probabilities": [
+			{
+				"id": "48aa3602-f12a-43b5-97e2-71b3226a50dd",
+				"outcome_id": "1adea7f4-b7a2-4662-9141-920f45be470f",
+				"uncertainty_id": "0dc891fc-a546-4b0b-b787-49d731d4a45e",
+				"project_id": "a842f092-01c9-4cd7-a226-955e0adce01f",
+				"probability": 0.25,
+				"parent_outcome_ids": [
+					"a07172bc-6f9e-45ba-ae3f-79fcc11ed261"
+				],
+				"parent_option_ids": [
+					"cd77962a-afb4-48be-bdec-d258deb0d294"
+				]
+			},
+			{
+				"id": "25a7beca-cdbd-4f2e-9656-965a716e4a50",
+				"outcome_id": "4baf5cfd-c9b3-4693-b6a5-2e9207aa867b",
+				"uncertainty_id": "0dc891fc-a546-4b0b-b787-49d731d4a45e",
+				"project_id": "a842f092-01c9-4cd7-a226-955e0adce01f",
+				"probability": 0.5,
+				"parent_outcome_ids": [
+					"a07172bc-6f9e-45ba-ae3f-79fcc11ed261"
+				],
+				"parent_option_ids": [
+					"cd77962a-afb4-48be-bdec-d258deb0d294"
+				]
+			},
+			{
+				"id": "d5784ee6-3b4a-4ad6-9f29-3778ba208edd",
+				"outcome_id": "1adea7f4-b7a2-4662-9141-920f45be470f",
+				"uncertainty_id": "0dc891fc-a546-4b0b-b787-49d731d4a45e",
+				"project_id": "a842f092-01c9-4cd7-a226-955e0adce01f",
+				"probability": 0.125,
+				"parent_outcome_ids": [
+					"e29f83fa-1691-4d3e-81f5-8b161fdc35a9"
+				],
+				"parent_option_ids": [
+					"cd77962a-afb4-48be-bdec-d258deb0d294"
+				]
+			},
+			{
+				"id": "955859c6-f1d0-4104-b48b-507a2135afac",
+				"outcome_id": "4baf5cfd-c9b3-4693-b6a5-2e9207aa867b",
+				"uncertainty_id": "0dc891fc-a546-4b0b-b787-49d731d4a45e",
+				"project_id": "a842f092-01c9-4cd7-a226-955e0adce01f",
+				"probability": 0.375,
+				"parent_outcome_ids": [
+					"e29f83fa-1691-4d3e-81f5-8b161fdc35a9"
+				],
+				"parent_option_ids": [
+					"cd77962a-afb4-48be-bdec-d258deb0d294"
+				]
+			},
+			{
+				"id": "ffb9a239-bf52-45c5-b0fa-c2af02513c05",
+				"outcome_id": "1adea7f4-b7a2-4662-9141-920f45be470f",
+				"uncertainty_id": "0dc891fc-a546-4b0b-b787-49d731d4a45e",
+				"project_id": "a842f092-01c9-4cd7-a226-955e0adce01f",
+				"probability": 0.25,
+				"parent_outcome_ids": [
+					"a07172bc-6f9e-45ba-ae3f-79fcc11ed261"
+				],
+				"parent_option_ids": [
+					"cdd4d6ab-d048-4741-a558-766f55db232d"
+				]
+			},
+			{
+				"id": "62bc9b43-b5d1-43c1-8933-451f533d3885",
+				"outcome_id": "4baf5cfd-c9b3-4693-b6a5-2e9207aa867b",
+				"uncertainty_id": "0dc891fc-a546-4b0b-b787-49d731d4a45e",
+				"project_id": "a842f092-01c9-4cd7-a226-955e0adce01f",
+				"probability": 0.5,
+				"parent_outcome_ids": [
+					"a07172bc-6f9e-45ba-ae3f-79fcc11ed261"
+				],
+				"parent_option_ids": [
+					"cdd4d6ab-d048-4741-a558-766f55db232d"
+				]
+			},
+			{
+				"id": "337db5e4-413a-4bcd-b0d3-403cdf4f6aae",
+				"outcome_id": "1adea7f4-b7a2-4662-9141-920f45be470f",
+				"uncertainty_id": "0dc891fc-a546-4b0b-b787-49d731d4a45e",
+				"project_id": "a842f092-01c9-4cd7-a226-955e0adce01f",
+				"probability": 0.125,
+				"parent_outcome_ids": [
+					"e29f83fa-1691-4d3e-81f5-8b161fdc35a9"
+				],
+				"parent_option_ids": [
+					"cdd4d6ab-d048-4741-a558-766f55db232d"
+				]
+			},
+			{
+				"id": "0932c038-8105-401b-95c6-cf4aa2741276",
+				"outcome_id": "4baf5cfd-c9b3-4693-b6a5-2e9207aa867b",
+				"uncertainty_id": "0dc891fc-a546-4b0b-b787-49d731d4a45e",
+				"project_id": "a842f092-01c9-4cd7-a226-955e0adce01f",
+				"probability": 0.375,
+				"parent_outcome_ids": [
+					"e29f83fa-1691-4d3e-81f5-8b161fdc35a9"
+				],
+				"parent_option_ids": [
+					"cdd4d6ab-d048-4741-a558-766f55db232d"
+				]
+			}
+		],
+		"discrete_utilities": [],
+		"restriction_tables": []
+	},
+	"expected": {
+		"discrete_probabilities": [
+			{
+				"id": "0038f002-66cc-1068-be20-2689afe68eee",
+				"outcome_id": "4baf5cfd-c9b3-4693-b6a5-2e9207aa867b",
+				"uncertainty_id": "0dc891fc-a546-4b0b-b787-49d731d4a45e",
+				"project_id": "a842f092-01c9-4cd7-a226-955e0adce01f",
+				"probability": 0,
+				"parent_outcome_ids": [
+					"3d88d864-6c06-44b2-994d-22d45a3ead5a"
+				],
+				"parent_option_ids": [
+					"cdd4d6ab-d048-4741-a558-766f55db232d"
+				]
+			},
+			{
+				"id": "0932c038-8105-401b-95c6-cf4aa2741276",
+				"outcome_id": "4baf5cfd-c9b3-4693-b6a5-2e9207aa867b",
+				"uncertainty_id": "0dc891fc-a546-4b0b-b787-49d731d4a45e",
+				"project_id": "a842f092-01c9-4cd7-a226-955e0adce01f",
+				"probability": 0.375,
+				"parent_outcome_ids": [
+					"e29f83fa-1691-4d3e-81f5-8b161fdc35a9"
+				],
+				"parent_option_ids": [
+					"cdd4d6ab-d048-4741-a558-766f55db232d"
+				]
+			},
+			{
+				"id": "215fc2af-193d-b198-77c7-25f910c268fe",
+				"outcome_id": "4baf5cfd-c9b3-4693-b6a5-2e9207aa867b",
+				"uncertainty_id": "0dc891fc-a546-4b0b-b787-49d731d4a45e",
+				"project_id": "a842f092-01c9-4cd7-a226-955e0adce01f",
+				"probability": 0,
+				"parent_outcome_ids": [
+					"3d88d864-6c06-44b2-994d-22d45a3ead5a"
+				],
+				"parent_option_ids": [
+					"cd77962a-afb4-48be-bdec-d258deb0d294"
+				]
+			},
+			{
+				"id": "25a7beca-cdbd-4f2e-9656-965a716e4a50",
+				"outcome_id": "4baf5cfd-c9b3-4693-b6a5-2e9207aa867b",
+				"uncertainty_id": "0dc891fc-a546-4b0b-b787-49d731d4a45e",
+				"project_id": "a842f092-01c9-4cd7-a226-955e0adce01f",
+				"probability": 0.5,
+				"parent_outcome_ids": [
+					"a07172bc-6f9e-45ba-ae3f-79fcc11ed261"
+				],
+				"parent_option_ids": [
+					"cd77962a-afb4-48be-bdec-d258deb0d294"
+				]
+			},
+			{
+				"id": "337db5e4-413a-4bcd-b0d3-403cdf4f6aae",
+				"outcome_id": "1adea7f4-b7a2-4662-9141-920f45be470f",
+				"uncertainty_id": "0dc891fc-a546-4b0b-b787-49d731d4a45e",
+				"project_id": "a842f092-01c9-4cd7-a226-955e0adce01f",
+				"probability": 0.125,
+				"parent_outcome_ids": [
+					"e29f83fa-1691-4d3e-81f5-8b161fdc35a9"
+				],
+				"parent_option_ids": [
+					"cdd4d6ab-d048-4741-a558-766f55db232d"
+				]
+			},
+			{
+				"id": "39e25213-7e7e-8e16-ae02-fdf40941cb74",
+				"outcome_id": "a07172bc-6f9e-45ba-ae3f-79fcc11ed261",
+				"uncertainty_id": "bcb27156-0dd7-4990-91a6-bc8d872f4974",
+				"project_id": "a842f092-01c9-4cd7-a226-955e0adce01f",
+				"probability": 0,
+				"parent_outcome_ids": [],
+				"parent_option_ids": []
+			},
+			{
+				"id": "48aa3602-f12a-43b5-97e2-71b3226a50dd",
+				"outcome_id": "1adea7f4-b7a2-4662-9141-920f45be470f",
+				"uncertainty_id": "0dc891fc-a546-4b0b-b787-49d731d4a45e",
+				"project_id": "a842f092-01c9-4cd7-a226-955e0adce01f",
+				"probability": 0.25,
+				"parent_outcome_ids": [
+					"a07172bc-6f9e-45ba-ae3f-79fcc11ed261"
+				],
+				"parent_option_ids": [
+					"cd77962a-afb4-48be-bdec-d258deb0d294"
+				]
+			},
+			{
+				"id": "62bc9b43-b5d1-43c1-8933-451f533d3885",
+				"outcome_id": "4baf5cfd-c9b3-4693-b6a5-2e9207aa867b",
+				"uncertainty_id": "0dc891fc-a546-4b0b-b787-49d731d4a45e",
+				"project_id": "a842f092-01c9-4cd7-a226-955e0adce01f",
+				"probability": 0.5,
+				"parent_outcome_ids": [
+					"a07172bc-6f9e-45ba-ae3f-79fcc11ed261"
+				],
+				"parent_option_ids": [
+					"cdd4d6ab-d048-4741-a558-766f55db232d"
+				]
+			},
+			{
+				"id": "845a1b2a-8897-34d9-3578-c2cefaa01a86",
+				"outcome_id": "e29f83fa-1691-4d3e-81f5-8b161fdc35a9",
+				"uncertainty_id": "bcb27156-0dd7-4990-91a6-bc8d872f4974",
+				"project_id": "a842f092-01c9-4cd7-a226-955e0adce01f",
+				"probability": 0,
+				"parent_outcome_ids": [],
+				"parent_option_ids": []
+			},
+			{
+				"id": "884e38b4-7343-4a8d-9b94-871180c31943",
+				"outcome_id": "1adea7f4-b7a2-4662-9141-920f45be470f",
+				"uncertainty_id": "0dc891fc-a546-4b0b-b787-49d731d4a45e",
+				"project_id": "a842f092-01c9-4cd7-a226-955e0adce01f",
+				"probability": 0,
+				"parent_outcome_ids": [
+					"3d88d864-6c06-44b2-994d-22d45a3ead5a"
+				],
+				"parent_option_ids": [
+					"cd77962a-afb4-48be-bdec-d258deb0d294"
+				]
+			},
+			{
+				"id": "955859c6-f1d0-4104-b48b-507a2135afac",
+				"outcome_id": "4baf5cfd-c9b3-4693-b6a5-2e9207aa867b",
+				"uncertainty_id": "0dc891fc-a546-4b0b-b787-49d731d4a45e",
+				"project_id": "a842f092-01c9-4cd7-a226-955e0adce01f",
+				"probability": 0.375,
+				"parent_outcome_ids": [
+					"e29f83fa-1691-4d3e-81f5-8b161fdc35a9"
+				],
+				"parent_option_ids": [
+					"cd77962a-afb4-48be-bdec-d258deb0d294"
+				]
+			},
+			{
+				"id": "b5dd53d5-e47e-a41c-840d-6388b9713dc2",
+				"outcome_id": "3d88d864-6c06-44b2-994d-22d45a3ead5a",
+				"uncertainty_id": "bcb27156-0dd7-4990-91a6-bc8d872f4974",
+				"project_id": "a842f092-01c9-4cd7-a226-955e0adce01f",
+				"probability": 0,
+				"parent_outcome_ids": [],
+				"parent_option_ids": []
+			},
+			{
+				"id": "d5784ee6-3b4a-4ad6-9f29-3778ba208edd",
+				"outcome_id": "1adea7f4-b7a2-4662-9141-920f45be470f",
+				"uncertainty_id": "0dc891fc-a546-4b0b-b787-49d731d4a45e",
+				"project_id": "a842f092-01c9-4cd7-a226-955e0adce01f",
+				"probability": 0.125,
+				"parent_outcome_ids": [
+					"e29f83fa-1691-4d3e-81f5-8b161fdc35a9"
+				],
+				"parent_option_ids": [
+					"cd77962a-afb4-48be-bdec-d258deb0d294"
+				]
+			},
+			{
+				"id": "dc6cba06-2e8b-6011-2744-496dbed61d74",
+				"outcome_id": "1adea7f4-b7a2-4662-9141-920f45be470f",
+				"uncertainty_id": "0dc891fc-a546-4b0b-b787-49d731d4a45e",
+				"project_id": "a842f092-01c9-4cd7-a226-955e0adce01f",
+				"probability": 0,
+				"parent_outcome_ids": [
+					"3d88d864-6c06-44b2-994d-22d45a3ead5a"
+				],
+				"parent_option_ids": [
+					"cdd4d6ab-d048-4741-a558-766f55db232d"
+				]
+			},
+			{
+				"id": "ffb9a239-bf52-45c5-b0fa-c2af02513c05",
+				"outcome_id": "1adea7f4-b7a2-4662-9141-920f45be470f",
+				"uncertainty_id": "0dc891fc-a546-4b0b-b787-49d731d4a45e",
+				"project_id": "a842f092-01c9-4cd7-a226-955e0adce01f",
+				"probability": 0.25,
+				"parent_outcome_ids": [
+					"a07172bc-6f9e-45ba-ae3f-79fcc11ed261"
+				],
+				"parent_option_ids": [
+					"cdd4d6ab-d048-4741-a558-766f55db232d"
+				]
+			}
+		],
+		"discrete_utilities": [],
+		"restriction_tables": []
+	}
+}

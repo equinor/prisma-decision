@@ -1,0 +1,76 @@
+{
+	"description": "Removing the last Parent clears the Utility table.",
+	"input": {
+		"issues": [
+			{
+				"id": "f78437b0-e2fa-4ecf-82b6-0dcbd4741320",
+				"project_id": "e933dff6-c31a-42e8-8c13-618099bffb05",
+				"type": "Decision",
+				"boundary": "on",
+				"node": {
+					"id": "32e09f17-cec5-440c-8876-f5a4c21adaca"
+				},
+				"uncertainty": null,
+				"decision": {
+					"id": "624d6179-dede-4848-9bf4-7a1c10dbd07f",
+					"type": "Focus",
+					"options": [
+						{
+							"id": "832a3fcb-44df-499f-a361-ce5d37f487e2"
+						},
+						{
+							"id": "978c4053-9c36-44d6-92cf-f7aa88d1ed53"
+						}
+					]
+				},
+				"utility": null
+			},
+			{
+				"id": "cc073dba-1841-483f-b386-ac86255b8d7e",
+				"project_id": "e933dff6-c31a-42e8-8c13-618099bffb05",
+				"type": "Utility",
+				"boundary": "in",
+				"node": {
+					"id": "891b1f76-caf3-4d63-9d76-2ccca1350160"
+				},
+				"uncertainty": null,
+				"decision": null,
+				"utility": {
+					"id": "69787ec2-f43b-47c3-b112-4d16eb8b0d6d"
+				}
+			}
+		],
+		"edges": [],
+		"discrete_probabilities": [],
+		"discrete_utilities": [
+			{
+				"id": "0db0d33e-e350-4cd9-9b1a-94f5155f4661",
+				"value_metric_id": "288e0811-7ab6-5d24-b80c-9fa925b848a6",
+				"utility_id": "69787ec2-f43b-47c3-b112-4d16eb8b0d6d",
+				"project_id": "e933dff6-c31a-42e8-8c13-618099bffb05",
+				"utility_value": 10,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"832a3fcb-44df-499f-a361-ce5d37f487e2"
+				]
+			},
+			{
+				"id": "18815fea-7978-4bd0-899a-06916f10ca92",
+				"value_metric_id": "288e0811-7ab6-5d24-b80c-9fa925b848a6",
+				"utility_id": "69787ec2-f43b-47c3-b112-4d16eb8b0d6d",
+				"project_id": "e933dff6-c31a-42e8-8c13-618099bffb05",
+				"utility_value": -5,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"978c4053-9c36-44d6-92cf-f7aa88d1ed53"
+				]
+			}
+		],
+		"restriction_tables": []
+	},
+	"expected": {
+		"discrete_probabilities": [],
+		"discrete_utilities": [],
+		"restriction_tables": []
+	}
+}

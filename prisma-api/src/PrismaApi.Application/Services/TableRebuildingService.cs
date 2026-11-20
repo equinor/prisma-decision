@@ -6,27 +6,16 @@ using PrismaApi.Domain.Dtos;
 using PrismaApi.Domain.Entities;
 using PrismaApi.Infrastructure.Context;
 using PrismaApi.Domain.Extensions;
-using PrismaApi.Domain.Utilities;
-using PrismaDotnetApi.PrismaApi.Domain.Extensions;
+using PrismaApi.Domain.TableShapes;
 
 namespace PrismaApi.Application.Services;
 
 public class TableRebuildingService : ITableRebuildingService
 {
-    private const int MaxTableEntryCount = 500;
-
     protected readonly AppDbContext DbContext;
     public TableRebuildingService(AppDbContext dbContext)
     {
         DbContext = dbContext;
-    }
-
-    private static Guid GetDeterministicIdRestrictionEntry(Guid restrictionTableId, Guid parentId, Guid childId)
-    {
-        var combined = $"{restrictionTableId}|" +
-                       $"ParentId:{parentId}|" +
-                       $"ChildId:{childId}";
-        return combined.GenerateDeterministicGuid();
     }
 
     public async Task RebuildTablesAsync(CancellationToken ct = default)
@@ -83,111 +72,32 @@ public class TableRebuildingService : ITableRebuildingService
 
     private async Task RebuildRestrictionTable(RestrictionTable restrictionTable, CancellationToken ct)
     {
-        var parentIssue = restrictionTable.Edge!.TailNode!.Issue!;
-        var childIssue = restrictionTable.Edge!.HeadNode!.Issue!;
-        var isParentUncertainty = IsIssueType(parentIssue.Type, IssueType.Uncertainty) && parentIssue.Uncertainty != null;
-        var isChildUncertainty = IsIssueType(childIssue.Type, IssueType.Uncertainty) && childIssue.Uncertainty != null;
-        // check if parent and child are in scope of the influence diagram, if not the restriction table should be deleted,
-        // if yes then we need to check if the combinations of parent outcomes and options have changed and update the restriction table entries accordingly
-        if (!IsBoundaryInScope(parentIssue.Boundary) ||
-            !IsBoundaryInScope(childIssue.Boundary) ||
-            !IsIssueConfiguredInInfluenceDiagram(parentIssue) ||
-            !IsIssueConfiguredInInfluenceDiagram(childIssue))
+        var existingEntries = restrictionTable.RestrictionEntries.ToList();
+        var desiredEntries = TableShapeBuilder.RebuildRestrictionTable(
+            new RestrictionTableDto
+            {
+                Id = restrictionTable.Id,
+                ProjectId = restrictionTable.ProjectId,
+                EdgeId = restrictionTable.EdgeId,
+                Name = restrictionTable.Name,
+            },
+            restrictionTable.Edge!.TailNode!.Issue!.ToTableShapeIssue(),
+            restrictionTable.Edge!.HeadNode!.Issue!.ToTableShapeIssue(),
+            existingEntries.ToOutgoingDtos());
+        if (desiredEntries == null)
         {
             DbContext.RestrictionTables.Remove(restrictionTable);
             return;
         }
-        // check that the parent child combination are correct,
-        // this is simpler than the other tables since a restriction entry can only have one child and one parent,
-        // so we just need to check that the parent issue has at least one of the relevant types and that the child issue has at least one of the relevant types,
-        // if not then the restriction table should be deleted,
-        // if yes then we need to check if the combinations of parent outcomes and options have changed and update the restriction table entries accordingly
 
-        var restrictionEntries = restrictionTable.RestrictionEntries.ToList();
-
-        List<(Guid? ParentId, Guid? ChildId)> existingCombinations = restrictionEntries
-            .Select(entry => (
-                ParentId: entry.ParentOutcomeId ?? entry.ParentOptionId,
-                ChildId: entry.ChildOutcomeId ?? entry.ChildOptionId))
-            .ToList();
-
-        var parentIds = isParentUncertainty
-            ? parentIssue.Uncertainty!.Outcomes.Select(o => (Guid?)o.Id)
-            : parentIssue.Decision!.Options.Select(o => (Guid?)o.Id);
-
-        var childIds = isChildUncertainty
-            ? childIssue.Uncertainty!.Outcomes.Select(o => (Guid?)o.Id)
-            : childIssue.Decision!.Options.Select(o => (Guid?)o.Id);
-
-        if (WouldExceedTableEntryLimit(parentIds.Count(), childIds.Count()))
-        {
-            DbContext.RestrictionEntries.RemoveRange(restrictionEntries);
-            return;
-        }
-
-        List<(Guid? ParentId, Guid? ChildId)> validCombinations = (from parentId in parentIds
-                                                                   from childId in childIds
-                                                                   select (ParentId: parentId, ChildId: childId)).ToList();
-
-        // check that the current combinations in the restriction table are still valid, if not then remove them, then add any new valid combinations that are not currently in the restriction table
-
-        if (existingCombinations.All(ec => validCombinations.Contains(ec)) && existingCombinations.Count == validCombinations.Count)
-        {
-            // the combinations are the same, no need to update the restriction table entries
-            return;
-        }
-        else if (existingCombinations.All(ec => validCombinations.Contains(ec)))
-        {
-            // the existing combinations are a subset of the valid combinations, we just need to add the new combinations
-            var combinationsToAdd = validCombinations.Except(existingCombinations).ToList();
-            foreach (var combination in combinationsToAdd)
-            {
-                var id = combination.ParentId != null && combination.ChildId != null
-                    ? GetDeterministicIdRestrictionEntry(restrictionTable.Id, combination.ParentId.Value, combination.ChildId.Value)
-                    : Guid.NewGuid();
-                var newEntry = new RestrictionEntry
-                {
-                    Id = id,
-                    RestrictionTableId = restrictionTable.Id,
-                    ProjectId = restrictionTable.ProjectId,
-                    ParentOutcomeId = isParentUncertainty ? combination.ParentId : null,
-                    ParentOptionId = isParentUncertainty ? null : combination.ParentId,
-                    ChildOutcomeId = isChildUncertainty ? combination.ChildId : null,
-                    ChildOptionId = isChildUncertainty ? null : combination.ChildId,
-                };
-                await DbContext.RestrictionEntries.AddAsync(newEntry, ct);
-            }
-        }
-        else
-        {
-            // some of the existing combinations are no longer valid, we need to remove the invalid combinations and add any new valid combinations
-            var combinationsToRemove = existingCombinations.Except(validCombinations).ToList();
-            var entriesToRemove = restrictionEntries.Where(entry =>
-                combinationsToRemove.Contains((
-                    ParentId: entry.ParentOutcomeId ?? entry.ParentOptionId,
-                    ChildId: entry.ChildOutcomeId ?? entry.ChildOptionId))
-            ).ToList();
-            DbContext.RestrictionEntries.RemoveRange(entriesToRemove);
-
-            var combinationsToAdd = validCombinations.Except(existingCombinations).ToList();
-            foreach (var combination in combinationsToAdd)
-            {
-                var id = combination.ParentId != null && combination.ChildId != null
-                    ? GetDeterministicIdRestrictionEntry(restrictionTable.Id, combination.ParentId.Value, combination.ChildId.Value)
-                    : Guid.NewGuid();
-                var newEntry = new RestrictionEntry
-                {
-                    Id = id,
-                    RestrictionTableId = restrictionTable.Id,
-                    ProjectId = restrictionTable.ProjectId,
-                    ParentOutcomeId = isParentUncertainty ? combination.ParentId : null,
-                    ParentOptionId = isParentUncertainty ? null : combination.ParentId,
-                    ChildOutcomeId = isChildUncertainty ? combination.ChildId : null,
-                    ChildOptionId = isChildUncertainty ? null : combination.ChildId,
-                };
-                await DbContext.RestrictionEntries.AddAsync(newEntry, ct);
-            }
-        }
+        var desiredIds = desiredEntries.Select(entry => entry.Id).ToHashSet();
+        var existingIds = existingEntries.Select(entry => entry.Id).ToHashSet();
+        DbContext.RestrictionEntries.RemoveRange(existingEntries.Where(entry => !desiredIds.Contains(entry.Id)));
+        await DbContext.RestrictionEntries.AddRangeAsync(
+            desiredEntries
+                .Where(entry => !existingIds.Contains(entry.Id))
+                .Select(entry => entry.ToEntity()),
+            ct);
     }
 
     public async Task RebuildIssuesFromIssueIds(ICollection<Guid> issueIds, CancellationToken ct = default)
@@ -242,224 +152,35 @@ public class TableRebuildingService : ITableRebuildingService
     }
 
 
-    /// <summary>
-    /// Rebuilds the uncertainty table for the specified issue.
-    /// Note that the differance between the desired probabilities and the expanded probabilities is that the desired probabilities will always have the correct dimensions, while the expansion probabilities handles the prepopulation logic.
-    /// </summary>
     private async Task RebuildUncertaintyTable(Issue issue, CancellationToken ct = default)
     {
-        var uncertainty = issue.Uncertainty;
-        if (uncertainty == null)
-        {
-            return;
-        }
-        var existingProbabilities = uncertainty.DiscreteProbabilities.ToList();
-        // Convert the existing probabilities to DTOs that will be used for expansion and reconciliation.
-        var expandedProbabilities = existingProbabilities.ToDtos();
-
-        // Collect the parent state groups for the issue. 
-        // These groups represent the different combinations of parent states that will influence the probabilities.
-        var parentGroups = CollectParentStateGroups(issue);
-
-        if (WouldExceedTableEntryLimit(
-            uncertainty.Outcomes.Count,
-            parentGroups.Select(group => group.StateIds.Count)))
-        {
-            RemoveDiscreteProbabilities(existingProbabilities);
-            return;
-        }
-
-        if (expandedProbabilities.Count != 0)
-        {
-            // Add rows to the Probability table for each combination of parent states.
-            ExpandProbabilityParents(issue.Id, expandedProbabilities, parentGroups);
-
-            // Add columns for any new outcomes that are not already represented in the expanded probabilities.
-            var representedOutcomeIds = expandedProbabilities
-                .Select(probability => probability.OutcomeId)
-                .ToHashSet();
-            foreach (var addedOutcomeId in uncertainty.Outcomes
-                .Select(outcome => outcome.Id)
-                .Where(outcomeId => !representedOutcomeIds.Contains(outcomeId)))
-            {
-                expandedProbabilities.AddProbabilitiesColumn(issue.Id, addedOutcomeId);
-            }
-        }
-
-        // Build the desired probabilities that reflect the expanded parent state groups.
-        // This represents the target state of the Probability table with the correct dimensions
-        var desiredProbabilities = BuildDesiredProbabilities(issue, parentGroups, expandedProbabilities);
+        var existingProbabilities = issue.Uncertainty!.DiscreteProbabilities.ToList();
+        var desiredProbabilities = TableShapeBuilder.RebuildProbabilityTable(
+            issue.ToTableShapeIssue(),
+            ParentIssues(issue),
+            existingProbabilities.ToDtos());
         await ReconcileProbabilities(existingProbabilities, desiredProbabilities, ct);
     }
 
-    /// <summary>
-    /// Rebuilds the utility table for the specified issue.
-    /// Note that the difference between the desired utilities and the expanded utilities is that the desired utilities will always have the correct dimensions, while the expanded utilities handle the prepopulation logic.
-    /// </summary>
     private async Task RebuildUtilityTable(Issue issue, CancellationToken ct = default)
     {
-        var utility = issue.Utility;
-        if (utility == null)
-        {
-            return;
-        }
-
-        var existingUtilities = utility.DiscreteUtilities.ToList();
-        // Convert the existing utilities to DTOs that will be used for expansion and reconciliation.
-        var expandedUtilities = existingUtilities.ToDtos();
-
-        // Collect the parent state groups for the issue.
-        // These groups represent the different combinations of parent states that will influence the utilities.
-        var parentGroups = CollectParentStateGroups(issue);
-
-        if (parentGroups.Count != 0 &&
-            WouldExceedTableEntryLimit(parentGroups.Select(group => group.StateIds.Count)))
-        {
-            RemoveDiscreteUtilities(existingUtilities);
-            return;
-        }
-
-        if (expandedUtilities.Count != 0)
-        {
-            // Add rows to the Utility table for each combination of parent states.
-            ExpandUtilityParents(issue.Id, expandedUtilities, parentGroups);
-        }
-
-        // Build the desired utilities that reflect the expanded parent state groups.
-        // This represents the target state of the Utility table with the correct dimensions.
-        var desiredUtilities = BuildDesiredUtilities(issue, parentGroups, expandedUtilities);
+        var existingUtilities = issue.Utility!.DiscreteUtilities.ToList();
+        var desiredUtilities = TableShapeBuilder.RebuildUtilityTable(
+            issue.ToTableShapeIssue(),
+            ParentIssues(issue),
+            existingUtilities.ToDtos());
         await ReconcileUtilities(existingUtilities, desiredUtilities, ct);
     }
 
-    private static void ExpandProbabilityParents(
-        Guid issueId,
-        ICollection<DiscreteProbabilityDto> probabilities,
-        IEnumerable<ParentStateGroup> parentGroups)
-    {
-        foreach (var parentGroup in parentGroups)
-        {
-            var representedStateIds = parentGroup.StateIds
-                .Where(stateId => probabilities.Any(probability =>
-                    probability.ParentOutcomeIds.Contains(stateId) ||
-                    probability.ParentOptionIds.Contains(stateId)))
-                .ToList();
-            var addedStateIds = parentGroup.StateIds.Except(representedStateIds).ToList();
-
-            if (representedStateIds.Count == 0)
-            {
-                probabilities.AddProbabilityParent(issueId, addedStateIds, parentGroup.IsUncertainty);
-                continue;
-            }
-
-            foreach (var addedStateId in addedStateIds)
-            {
-                probabilities.AddProbabilitiesRow(issueId, addedStateId, representedStateIds);
-            }
-        }
-    }
-
-    private static void ExpandUtilityParents(
-        Guid issueId,
-        ICollection<DiscreteUtilityDto> utilities,
-        IEnumerable<ParentStateGroup> parentGroups)
-    {
-        foreach (var parentGroup in parentGroups)
-        {
-            var representedStateIds = parentGroup.StateIds
-                .Where(stateId => utilities.Any(utility =>
-                    utility.ParentOutcomeIds.Contains(stateId) ||
-                    utility.ParentOptionIds.Contains(stateId)))
-                .ToList();
-            var addedStateIds = parentGroup.StateIds.Except(representedStateIds).ToList();
-
-            if (representedStateIds.Count == 0)
-            {
-                utilities.AddUtilityParent(issueId, addedStateIds, !parentGroup.IsUncertainty);
-                continue;
-            }
-
-            foreach (var addedStateId in addedStateIds)
-            {
-                utilities.AddUtilitiesRow(issueId, addedStateId, representedStateIds);
-            }
-        }
-    }
-
-    private static List<DiscreteProbabilityDto> BuildDesiredProbabilities(
-        Issue issue,
-        IReadOnlyCollection<ParentStateGroup> parentGroups,
-        ICollection<DiscreteProbabilityDto> expandedProbabilities)
-    {
-        // should not be null due to earlier checks
-        var uncertainty = issue.Uncertainty ?? throw new InvalidOperationException("Uncertainty cannot be null during table rebuild");
-        
-        var expandedByKey = expandedProbabilities
-            .GroupBy(ProbabilityKey)
-            .ToDictionary(group => group.Key, group => group.First());
-        var combinations = BuildCombinations(parentGroups.Select(group => group.StateIds).ToList());
-        var outcomeStateIds = parentGroups
-            .Where(group => group.IsUncertainty)
-            .SelectMany(group => group.StateIds)
-            .ToHashSet();
-
-        return (from outcome in uncertainty.Outcomes
-                from combination in combinations
-                let parentOutcomeIds = combination.Where(outcomeStateIds.Contains).OrderBy(id => id).ToList()
-                let parentOptionIds = combination.Where(id => !outcomeStateIds.Contains(id)).OrderBy(id => id).ToList()
-                let key = ProbabilityKey(outcome.Id, parentOutcomeIds, parentOptionIds)
-                let expanded = expandedByKey.GetValueOrDefault(key)
-                select new DiscreteProbabilityDto
-                {
-                    Id = IdGenerationUtils.GetDeterministicIdProbability(issue.Id, outcome.Id, parentOutcomeIds, parentOptionIds),
-                    OutcomeId = outcome.Id,
-                    UncertaintyId = uncertainty.Id,
-                    ProjectId = issue.ProjectId,
-                    Probability = expanded?.Probability ?? 0,
-                    ParentOutcomeIds = parentOutcomeIds,
-                    ParentOptionIds = parentOptionIds
-                }).ToList();
-    }
-
-    private static List<DiscreteUtilityDto> BuildDesiredUtilities(
-        Issue issue,
-        IReadOnlyCollection<ParentStateGroup> parentGroups,
-        ICollection<DiscreteUtilityDto> expandedUtilities)
-    {
-        if (parentGroups.Count == 0)
-        {
-            return [];
-        }
-
-        // should not be null due to earlier checks
-        var utility = issue.Utility ?? throw new InvalidOperationException("Utility cannot be null");
-
-        var expandedByKey = expandedUtilities
-            .GroupBy(UtilityKey)
-            .ToDictionary(group => group.Key, group => group.First());
-        var combinations = BuildCombinations(parentGroups.Select(group => group.StateIds).ToList());
-        var outcomeStateIds = parentGroups
-            .Where(group => group.IsUncertainty)
-            .SelectMany(group => group.StateIds)
-            .ToHashSet();
-
-        // TODO: expand declarative LINQ expression to include additional utility metrics when they are added to the system
-        // see BuildDesiredUtilities for an example of how to expand the LINQ expression to include additional utility metrics
-        return (from combination in combinations
-                let parentOutcomeIds = combination.Where(outcomeStateIds.Contains).OrderBy(id => id).ToList()
-                let parentOptionIds = combination.Where(id => !outcomeStateIds.Contains(id)).OrderBy(id => id).ToList()
-                let key = UtilityKey(DomainConstants.DefaultValueMetricId, parentOutcomeIds, parentOptionIds)
-                let expanded = expandedByKey.GetValueOrDefault(key)
-                select new DiscreteUtilityDto
-                {
-                    Id = IdGenerationUtils.GetDeterministicIdUtility(issue.Id, DomainConstants.DefaultValueMetricId, parentOutcomeIds, parentOptionIds),
-                    ValueMetricId = DomainConstants.DefaultValueMetricId,
-                    UtilityId = utility.Id,
-                    ProjectId = issue.ProjectId,
-                    UtilityValue = expanded?.UtilityValue ?? 0,
-                    ParentOutcomeIds = parentOutcomeIds,
-                    ParentOptionIds = parentOptionIds
-                }).ToList();
-    }
+    /// <summary>
+    /// The tail Issues of the edges pointing to the issue's node.
+    /// </summary>
+    private static List<TableShapeIssue> ParentIssues(Issue issue) =>
+        (issue.Node?.HeadEdges ?? Array.Empty<Edge>())
+            .Select(edge => edge.TailNode?.Issue)
+            .Where(parentIssue => parentIssue != null)
+            .Select(parentIssue => parentIssue!.ToTableShapeIssue())
+            .ToList();
 
     private async Task ReconcileProbabilities(
         ICollection<DiscreteProbability> existingProbabilities,
@@ -513,72 +234,20 @@ public class TableRebuildingService : ITableRebuildingService
         await DbContext.DiscreteUtilities.AddRangeAsync(utilitiesToAdd, ct);
     }
 
-    private static string ProbabilityKey(DiscreteProbability probability) => ProbabilityKey(
+    private static string ProbabilityKey(DiscreteProbability probability) => TableShapeBuilder.ProbabilityKey(
         probability.OutcomeId,
         probability.ParentOutcomes.Select(parent => parent.ParentOutcomeId),
         probability.ParentOptions.Select(parent => parent.ParentOptionId));
 
-    private static string ProbabilityKey(DiscreteProbabilityDto probability) => ProbabilityKey(
-        probability.OutcomeId,
-        probability.ParentOutcomeIds,
-        probability.ParentOptionIds);
+    private static string ProbabilityKey(DiscreteProbabilityDto probability) => TableShapeBuilder.ProbabilityKey(probability);
 
-    private static string ProbabilityKey(Guid outcomeId, IEnumerable<Guid> parentOutcomeIds, IEnumerable<Guid> parentOptionIds) =>
-        $"{outcomeId}|{string.Join(',', parentOutcomeIds.OrderBy(id => id))}|{string.Join(',', parentOptionIds.OrderBy(id => id))}";
-
-    private static string UtilityKey(DiscreteUtility utility) => UtilityKey(
+    private static string UtilityKey(DiscreteUtility utility) => TableShapeBuilder.UtilityKey(
         utility.ValueMetricId,
         utility.ParentOutcomes.Select(parent => parent.ParentOutcomeId),
         utility.ParentOptions.Select(parent => parent.ParentOptionId));
 
-    private static string UtilityKey(DiscreteUtilityDto utility) => UtilityKey(
-        utility.ValueMetricId,
-        utility.ParentOutcomeIds,
-        utility.ParentOptionIds);
+    private static string UtilityKey(DiscreteUtilityDto utility) => TableShapeBuilder.UtilityKey(utility);
 
-    private static string UtilityKey(Guid valueMetricId, IEnumerable<Guid> parentOutcomeIds, IEnumerable<Guid> parentOptionIds) =>
-        $"{valueMetricId}|{string.Join(',', parentOutcomeIds.OrderBy(id => id))}|{string.Join(',', parentOptionIds.OrderBy(id => id))}";
-
-    /// <summary>
-    /// Represents a group of parent states, either from an uncertainty or a decision.
-    /// </summary>
-    /// <param name="StateIds"></param>
-    /// <param name="IsUncertainty"></param>
-    private sealed record ParentStateGroup(List<Guid> StateIds, bool IsUncertainty);
-
-    /// <summary>
-    /// Collects the parent state groups for a given issue.
-    /// Each element in the list represents the states for one issue node.
-    /// </summary>
-    /// <param name="issue">The issue for which to collect parent state groups.</param>
-    /// <returns>A list of parent state groups associated with the issue.</returns>
-    private static List<ParentStateGroup> CollectParentStateGroups(Issue issue)
-    {
-        // Collect head edges, i.e. the edges that are pointing to the current issue node.
-        // Note that parents are determined by the tail nodes of these edges.
-        var edges = issue.Node?.HeadEdges ?? Array.Empty<Edge>();
-        return edges
-            .GroupBy(edge => new { edge.TailId, edge.HeadId })
-            .Select(group => group.First().TailNode?.Issue)
-            .Where(parentIssue => parentIssue != null && IsBoundaryInScope(parentIssue.Boundary))
-            .Select(parentIssue =>
-            {
-                if (IsIssueType(parentIssue!.Type, IssueType.Uncertainty) && parentIssue.Uncertainty?.IsKey == true)
-                {
-                    return new ParentStateGroup(parentIssue.Uncertainty.Outcomes.Select(outcome => outcome.Id).ToList(), true);
-                }
-
-                if (IsIssueType(parentIssue.Type, IssueType.Decision) && IsDecisionFocus(parentIssue.Decision?.Type))
-                {
-                    return new ParentStateGroup(parentIssue.Decision!.Options.Select(option => option.Id).ToList(), false);
-                }
-
-                return null;
-            })
-            .Where(group => group is not null)
-            .Cast<ParentStateGroup>()
-            .ToList();
-    }
 
     public async Task RemoveExcessDiscreteProbabilities(Guid uncertaintyId, CancellationToken ct = default)
     {
@@ -707,70 +376,6 @@ public class TableRebuildingService : ITableRebuildingService
         DbContext.DiscreteUtilities.RemoveRange(discreteUtilities);
     }
 
-    private static List<List<Guid>> BuildCombinations(List<List<Guid>> groups)
-    {
-        var results = new List<List<Guid>> { new() };
-        foreach (var group in groups)
-        {
-            var next = new List<List<Guid>>();
-            foreach (var existing in results)
-            {
-                foreach (var item in group)
-                {
-                    var combination = new List<Guid>(existing) { item };
-                    next.Add(combination);
-                }
-            }
-
-            results = next;
-        }
-
-        return results;
-    }
-
-    private static bool WouldExceedTableEntryLimit(int initialEntryCount, IEnumerable<int> dimensions) =>
-        WouldExceedTableEntryLimit(dimensions.Prepend(initialEntryCount));
-
-    private static bool WouldExceedTableEntryLimit(params int[] dimensions) =>
-        WouldExceedTableEntryLimit(dimensions.AsEnumerable());
-
-    private static bool WouldExceedTableEntryLimit(IEnumerable<int> dimensions)
-    {
-        var count = dimensions.Aggregate(
-            1L,
-            (entryCount, dimension) => Math.Min(MaxTableEntryCount + 1L, entryCount * dimension));
-        return count > MaxTableEntryCount;
-    }
-
-    private static bool IsBoundaryInScope(string? boundary)
-    {
-        var normalized = Normalize(boundary);
-        return normalized == Normalize(Boundary.In.ToString()) ||
-               normalized == Normalize(Boundary.On.ToString());
-    }
-
-    private static bool IsIssueType(string? value, IssueType type)
-    {
-        return Normalize(value) == Normalize(type.ToString());
-    }
-
-    private static bool IsDecisionFocus(string? value)
-    {
-        return Normalize(value) == Normalize(DecisionHierarchy.Focus.ToString());
-    }
-
-    private static bool IsIssueConfiguredInInfluenceDiagram(Issue issue)
-    {
-        if (IsIssueType(issue.Type, IssueType.Uncertainty) && issue.Uncertainty != null)
-        {
-            return issue.Uncertainty.IsKey;
-        }
-        else if (IsIssueType(issue.Type, IssueType.Decision) && issue.Decision != null)
-        {
-            return IsDecisionFocus(issue.Decision.Type);
-        }
-        return false;
-    }
-
-    private static string Normalize(string? value) => (value ?? string.Empty).Trim().ToLowerInvariant();
+    private static bool IsIssueType(string? value, IssueType type) =>
+        (value ?? string.Empty).Trim().Equals(type.ToString(), StringComparison.OrdinalIgnoreCase);
 }

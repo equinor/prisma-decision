@@ -20,4 +20,12 @@ public static class IdGenerationUtils
                     $"Options:{string.Join(",", parentOptionIds.OrderBy(id => id))}";
         return combined.GenerateDeterministicGuid();
     }
+
+    public static Guid GetDeterministicIdRestrictionEntry(Guid restrictionTableId, Guid parentStateId, Guid childStateId)
+    {
+        var combined = $"{restrictionTableId}|" +
+                       $"ParentId:{parentStateId}|" +
+                       $"ChildId:{childStateId}";
+        return combined.GenerateDeterministicGuid();
+    }
 }

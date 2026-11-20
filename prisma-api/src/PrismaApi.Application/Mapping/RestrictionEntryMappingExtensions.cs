@@ -32,7 +32,10 @@ public static class RestrictionEntryMappingExtensions
         return entities.Select(ToOutgoingDto).ToList();
     }
 
-    public static RestrictionEntry ToEntity(this RestrictionEntryIncomingDto dto, UserOutgoingDto userDto)
+    public static RestrictionEntry ToEntity(this RestrictionEntryIncomingDto dto, UserOutgoingDto userDto) =>
+        ((RestrictionEntryDto)dto).ToEntity();
+
+    public static RestrictionEntry ToEntity(this RestrictionEntryDto dto)
     {
         Guid? parentOptionId = dto.IsParentUncertainty ? null : dto.ParentStateId;
         Guid? parentOutcomeId = dto.IsParentUncertainty ? dto.ParentStateId : null;

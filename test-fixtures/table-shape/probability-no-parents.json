@@ -1,0 +1,70 @@
+{
+	"description": "An Uncertainty without Parents gets one cell per Outcome, defaulting to 0.",
+	"input": {
+		"issues": [
+			{
+				"id": "95e70916-9345-4ea5-87f4-215cadb5a361",
+				"project_id": "5c5e76f8-9e70-48c2-9fcc-ea78ba2a40b4",
+				"type": "Uncertainty",
+				"boundary": "in",
+				"node": {
+					"id": "9c5654d8-d31b-4fca-8d7f-6bed4563a0f2"
+				},
+				"uncertainty": {
+					"id": "175af309-cb32-4439-b665-f0fbd0b77752",
+					"is_key": true,
+					"outcomes": [
+						{
+							"id": "97857ddb-7bc1-412a-b641-d1cf6462dd7a"
+						},
+						{
+							"id": "daf19b6e-7451-40ba-8527-e508c4be4ba1"
+						},
+						{
+							"id": "7ada88e0-0aa3-4294-b25c-339656764c2e"
+						}
+					]
+				},
+				"decision": null,
+				"utility": null
+			}
+		],
+		"edges": [],
+		"discrete_probabilities": [],
+		"discrete_utilities": [],
+		"restriction_tables": []
+	},
+	"expected": {
+		"discrete_probabilities": [
+			{
+				"id": "a5048bb1-2f97-47d7-0c9e-3b85efbb1fab",
+				"outcome_id": "97857ddb-7bc1-412a-b641-d1cf6462dd7a",
+				"uncertainty_id": "175af309-cb32-4439-b665-f0fbd0b77752",
+				"project_id": "5c5e76f8-9e70-48c2-9fcc-ea78ba2a40b4",
+				"probability": 0,
+				"parent_outcome_ids": [],
+				"parent_option_ids": []
+			},
+			{
+				"id": "ae9a5d98-8463-8254-6cc7-6c773ec6d54d",
+				"outcome_id": "daf19b6e-7451-40ba-8527-e508c4be4ba1",
+				"uncertainty_id": "175af309-cb32-4439-b665-f0fbd0b77752",
+				"project_id": "5c5e76f8-9e70-48c2-9fcc-ea78ba2a40b4",
+				"probability": 0,
+				"parent_outcome_ids": [],
+				"parent_option_ids": []
+			},
+			{
+				"id": "d1bbcc75-cc33-bbd4-60f2-2e89e100d49c",
+				"outcome_id": "7ada88e0-0aa3-4294-b25c-339656764c2e",
+				"uncertainty_id": "175af309-cb32-4439-b665-f0fbd0b77752",
+				"project_id": "5c5e76f8-9e70-48c2-9fcc-ea78ba2a40b4",
+				"probability": 0,
+				"parent_outcome_ids": [],
+				"parent_option_ids": []
+			}
+		],
+		"discrete_utilities": [],
+		"restriction_tables": []
+	}
+}
