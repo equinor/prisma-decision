@@ -137,6 +137,7 @@ Radix builds the UI from `radixconfig.yaml` and `radixconfig-public.yaml`:
 | **prod**    | `prisma-ui-v*` release tag    | `prisma.radix.equinor.com`        |
 | **public**  | `PUBLIC` tag                  | `prisma-public.radix.equinor.com` |
 | **design**  | `DESIGN` tag                  |                                   |
+| **ai**      | `AI` tag                      |                                   |
 
 See [Build and release](../prisma-api/docs/build-and-release.md). The app is built via Docker
 (`Dockerfile`) and served on port 3000 by a Node.js Express server (`deployment/`).

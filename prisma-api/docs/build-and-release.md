@@ -29,19 +29,21 @@ they are components of the same Radix application.
 * Each environment is built with `npm run build:<env>`, which reads `prisma-ui/.env.<mode>` at build
   time.
 
-## Test, public and design
+## Test, public, design and ai
 
-TEST, PUBLIC and DESIGN build the UI and API from shared moving tags. Check out the commit to deploy
+TEST, PUBLIC, DESIGN and AI build the UI and API from shared moving tags. Check out the commit to deploy
 and run:
 
 ```console
 mise run release:test     # moves TEST: deploys the test environment
 mise run release:public   # moves PUBLIC: deploys the public environment
 mise run release:design   # moves DESIGN: deploys the design environment
+mise run release:ai       # moves AI: deploys the ai environment (UI only)
 ```
 
 Pushing `TEST` or `PUBLIC` also applies the migrations to that environment's database. The design
-environment uses the public database and does not migrate it.
+and ai environments use the public database and do not migrate it. The ai environment only
+deploys the UI, which calls the public API.
 
 ## Environments
 
@@ -52,6 +54,7 @@ environment uses the public database and does not migrate it.
 | PROD        | `prisma-ui-v*` tags      | `prisma-api-v*` tags      |
 | PUBLIC      | `PUBLIC` tag             | `PUBLIC` tag              |
 | DESIGN      | `DESIGN` tag             | `DESIGN` tag              |
+| AI          | `AI` tag                 |                           |
 
 The migrations workflow logs in to Azure with the `AZURE_*` secrets of the GitHub environment named
 after the target (`Development`, `Test`, `Production`, `Public`).

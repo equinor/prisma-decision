@@ -91,6 +91,14 @@ run = [
   "git push -f origin refs/tags/DESIGN",
 ]
 
+[tasks."release:ai"]
+description = "Deploy the current commit to the ai environment by moving the AI tag"
+run = [
+  "git fetch origin --tags --force",
+  "git tag -f AI",
+  "git push -f origin refs/tags/AI",
+]
+
 [tasks.build]
 description = "Build the API and UI"
 run = [
