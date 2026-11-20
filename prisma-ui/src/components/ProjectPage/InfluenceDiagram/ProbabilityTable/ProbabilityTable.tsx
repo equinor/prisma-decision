@@ -1,7 +1,7 @@
 import { Button, Icon } from '@equinor/eds-core-react';
 import { close } from '@equinor/eds-icons';
-import { useUpdateDiscreteProbabilities } from '../../../../hooks/api/useUpdateDiscreteProbabilities';
-import { Issue } from '../../../../validators';
+import { useBulkUpdateDiscreteProbabilities } from '../../../../hooks/api/useUpdateDiscreteProbabilities';
+import { DiscreteProbability, Issue } from '../../../../validators';
 import { CardContainer } from '../../../common/Cards/CardContainer';
 import { ConditionalTable } from '../ConditionalTable/ConditionalTable';
 import { RandomizeProbabilitiesButton } from './RandomizeProbabilitiesButton';
@@ -30,8 +30,32 @@ export const ProbabilityTable = ({ issue, selected, onClose }: ProbabilityTableP
 );
 
 export const ProbabilityConditionalTable = ({ issue }: { issue: Issue }) => {
-	const { childOutcomes, parents, rows, lookups, restrictedCells } = useProbablityTable(issue);
-	const { mutate: updateProbability } = useUpdateDiscreteProbabilities();
+	const { mutate: updateProbabilities } = useBulkUpdateDiscreteProbabilities();
+	return (
+		<ProbabilityTableContent
+			issue={issue}
+			onCommit={probability => updateProbabilities([probability])}
+		/>
+	);
+};
+
+/**
+ * The editable Probability table body. Shows the cached cells unless `probabilities` is given,
+ * and reports each edited cell through `onCommit`.
+ */
+export const ProbabilityTableContent = ({
+	issue,
+	probabilities,
+	onCommit,
+}: {
+	issue: Issue;
+	probabilities?: DiscreteProbability[];
+	onCommit: (probability: DiscreteProbability) => void;
+}) => {
+	const { childOutcomes, parents, rows, lookups, restrictedCells } = useProbablityTable(
+		issue,
+		probabilities,
+	);
 	if (!childOutcomes.length) {
 		return (
 			<p className='text-text-tertiary px-2 py-1 text-xs'>
@@ -75,7 +99,7 @@ export const ProbabilityConditionalTable = ({ issue }: { issue: Issue }) => {
 											min={0}
 											max={1}
 											onCommit={value =>
-												updateProbability({
+												onCommit({
 													...probability,
 													probability: value,
 												})
