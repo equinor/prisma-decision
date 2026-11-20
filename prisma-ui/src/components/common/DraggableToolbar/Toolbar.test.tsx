@@ -249,7 +249,7 @@ test('uses Ariakit navigation without changing the active tool', async () => {
 		</Provider>,
 	);
 	await user.tab();
-	expect(screen.getByRole('radio', { name: 'Pan mode' })).toHaveFocus();
+	await waitFor(() => expect(screen.getByRole('radio', { name: 'Pan mode' })).toHaveFocus());
 	for (const [key, name] of [
 		['ArrowRight', 'Selection mode'],
 		['ArrowRight', 'Rectangle mode'],
@@ -258,7 +258,7 @@ test('uses Ariakit navigation without changing the active tool', async () => {
 		['Home', 'Pan mode'],
 	]) {
 		await user.keyboard(`{${key}}`);
-		expect(screen.getByRole('radio', { name })).toHaveFocus();
+		await waitFor(() => expect(screen.getByRole('radio', { name })).toHaveFocus());
 		expect(store.get(activeToolAtom)).toBe('pan');
 	}
 });

@@ -1,8 +1,7 @@
 name: API Pull Request
 on:
+    # Every target branch, so stacked PRs are checked too.
     pull_request:
-        branches:
-            - main
         paths:
             - "prisma-api/**"
             - ".github/workflows/api-pull-request.yml"

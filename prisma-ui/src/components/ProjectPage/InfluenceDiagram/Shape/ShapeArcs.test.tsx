@@ -320,7 +320,9 @@ test('Escape returns keyboard focus to Add arc and Tab continues through the nod
 	await user.tab();
 	expect(trigger).toHaveFocus();
 	await user.keyboard('{Enter}');
-	expect(await screen.findByRole('menuitem', { name: 'Uncertainty Oil price' })).toHaveFocus();
+	// EDS focuses the active menu item in an animation frame.
+	const firstTarget = await screen.findByRole('menuitem', { name: 'Uncertainty Oil price' });
+	await waitFor(() => expect(firstTarget).toHaveFocus());
 	await user.keyboard('{Escape}');
 	await waitFor(() => expect(screen.queryByRole('menu', { name: 'Add arc to' })).toBeNull());
 	await waitFor(() => expect(trigger).toHaveFocus());
@@ -371,9 +373,13 @@ test('keyboard users can navigate the EDS menu and connect to a Utility', async 
 	const decision = await screen.findByTestId(`rf__node-${fixture.issues[0].node.id}`);
 	within(decision).getByRole('button', { name: 'Add arc' }).focus();
 	await user.keyboard('{Enter}');
-	expect(await screen.findByRole('menuitem', { name: 'Uncertainty Oil price' })).toHaveFocus();
+	// EDS focuses the active menu item in an animation frame.
+	const firstTarget = await screen.findByRole('menuitem', { name: 'Uncertainty Oil price' });
+	await waitFor(() => expect(firstTarget).toHaveFocus());
 	await user.keyboard('{ArrowDown}');
-	expect(screen.getByRole('menuitem', { name: 'Utility NPV' })).toHaveFocus();
+	await waitFor(() =>
+		expect(screen.getByRole('menuitem', { name: 'Utility NPV' })).toHaveFocus(),
+	);
 	await user.keyboard('{Enter}');
 	await waitFor(() => expect(edgeWrites()).toHaveLength(1));
 	expect(edgeWrites()[0].data).toEqual([

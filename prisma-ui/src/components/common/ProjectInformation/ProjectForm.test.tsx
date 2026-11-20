@@ -95,7 +95,7 @@ describe('project name editing', () => {
 	it('does not handle Enter outside the project name field', async () => {
 		const user = userEvent.setup();
 		renderForm();
-		const search = screen.getByRole('textbox', { name: 'Search users' });
+		const search = screen.getByRole('searchbox', { name: 'Search users' });
 		await user.click(search);
 		await user.keyboard('{Enter}');
 
