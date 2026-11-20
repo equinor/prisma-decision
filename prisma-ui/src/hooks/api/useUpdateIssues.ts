@@ -2,28 +2,13 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '../../api';
 import { Issue } from '../../validators';
 import { showErrorToast } from '../../components/ShowToast';
+import {
+	applyOptimisticTables,
+	restoreTables,
+	withUpdatedIssues,
+} from '../../utils/tableShapes/applyOptimisticTables';
 
 export const issueMutationScope = { id: 'issues' };
-
-export const useUpdateIssues = () => {
-	const queryClient = useQueryClient();
-	return useMutation({
-		scope: issueMutationScope,
-		mutationFn: async (issues: Issue[]) => {
-			await apiClient.put('/issues', issues);
-		},
-		onSuccess: () => {
-			queryClient.refetchQueries({ queryKey: ['issues'] });
-			queryClient.invalidateQueries({ queryKey: ['probabilityTables'] });
-			queryClient.invalidateQueries({ queryKey: ['utilityTables'] });
-			queryClient.invalidateQueries({ queryKey: ['decisionTree'] });
-			queryClient.invalidateQueries({ queryKey: ['solution'] });
-		},
-		onError: () => {
-			showErrorToast('Failed to update issues');
-		},
-	});
-};
 
 export const useUpdateIssuesOptimistic = (args?: { errorMessage?: string }) => {
 	const queryClient = useQueryClient();
@@ -33,18 +18,12 @@ export const useUpdateIssuesOptimistic = (args?: { errorMessage?: string }) => {
 			await apiClient.put('/issues', issues);
 		},
 		onMutate: async issues => {
-			await queryClient.cancelQueries({ queryKey: ['issues'] });
-			const previousIssues = queryClient.getQueryData<Issue[]>(['issues']);
-			const newIssues = previousIssues?.map(issue => {
-				const updatedIssue = issues.find(i => i.id === issue.id);
-				return updatedIssue ? { ...issue, ...updatedIssue } : issue;
-			});
-			queryClient.setQueryData(['issues'], newIssues);
-			return { previousIssues };
+			return applyOptimisticTables(queryClient, cache => ({
+				issues: withUpdatedIssues(cache.issues, issues),
+			}));
 		},
-		onError: (_err, _issues, context) => {
-			queryClient.setQueryData(['issues'], context?.previousIssues);
-			queryClient.invalidateQueries({ queryKey: ['issues'] });
+		onError: (_err, _issues, previous) => {
+			restoreTables(queryClient, previous);
 			showErrorToast(args?.errorMessage ?? 'Failed to update issues');
 		},
 		onSuccess: () => {
