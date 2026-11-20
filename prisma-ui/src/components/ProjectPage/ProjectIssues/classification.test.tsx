@@ -163,19 +163,24 @@ test('List keeps state counts and full Edit uses its existing non-optimistic sav
 			}),
 	);
 	const user = renderIssues();
-	await user.click(await screen.findByRole('button', { name: 'Edit issue: Drill well' }));
+	const edit = await screen.findByRole('button', { name: 'Edit issue: Drill well' });
 	expect(screen.getByRole('cell', { name: '1' })).toBeInTheDocument();
+	await user.click(edit);
 	const name = within(screen.getByRole('dialog', { name: 'Edit Issue' })).getByRole('textbox', {
 		name: 'Issue name',
 	});
 	await user.clear(name);
 	await user.type(name, 'Renamed issue');
-	await user.click(screen.getByRole('button', { name: 'Update Issue' }));
+	await user.click(screen.getByRole('button', { name: 'Update decision' }));
 	await waitFor(() => expect(apiClient.put).toHaveBeenCalledTimes(1));
-	expect(screen.getByText('Drill well')).toBeInTheDocument();
-	expect(screen.queryByText('Renamed issue')).not.toBeInTheDocument();
+	// The open sheet hides the List from the accessibility tree.
+	expect(
+		screen.getByRole('button', { name: 'Edit issue: Drill well', hidden: true }),
+	).toBeInTheDocument();
 	await act(async () => finish());
-	expect(await screen.findByText('Renamed issue')).toBeInTheDocument();
+	expect(
+		await screen.findByRole('button', { name: 'Edit issue: Renamed issue', hidden: true }),
+	).toBeInTheDocument();
 });
 
 test('List decision type saves immediately and moves the intact issue out of the diagram group', async () => {
