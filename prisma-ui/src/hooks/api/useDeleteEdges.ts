@@ -1,7 +1,10 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '../../api';
 import { showErrorToast } from '../../components/ShowToast';
-import { Edge } from '../../validators';
+import {
+	applyOptimisticTables,
+	restoreTables,
+} from '../../utils/tableShapes/applyOptimisticTables';
 
 export const useDeleteEdges = () => {
 	const queryClient = useQueryClient();
@@ -13,14 +16,10 @@ export const useDeleteEdges = () => {
 			await apiClient.delete(`/edges?${params.toString()}`);
 		},
 		onMutate: async (deletedIds: string[]) => {
-			await queryClient.cancelQueries({ queryKey: ['edges'] });
-			const previousEdges = queryClient.getQueryData<Edge[]>(['edges']) || [];
 			const deletedIdSet = new Set(deletedIds);
-			queryClient.setQueryData(
-				['edges'],
-				previousEdges.filter(edge => !deletedIdSet.has(edge.id)),
-			);
-			return { previousEdges };
+			return applyOptimisticTables(queryClient, ({ edges }) => ({
+				edges: edges.filter(edge => !deletedIdSet.has(edge.id)),
+			}));
 		},
 		onSuccess: (_data, ids) => {
 			if (ids.length === 0) return;
@@ -28,13 +27,12 @@ export const useDeleteEdges = () => {
 			queryClient.invalidateQueries({ queryKey: ['utilityTables'] });
 			queryClient.invalidateQueries({ queryKey: ['decisionTree'] });
 			queryClient.invalidateQueries({ queryKey: ['solution'] });
+			queryClient.invalidateQueries({ queryKey: ['restrictionTables'] });
 			queryClient.refetchQueries({ queryKey: ['issues'] });
 		},
-		onError: (_err, _deletedIds, context) => {
+		onError: (_err, _deletedIds, previous) => {
 			showErrorToast('Failed to delete edges');
-			if (context?.previousEdges) {
-				queryClient.setQueryData(['edges'], context.previousEdges);
-			}
+			restoreTables(queryClient, previous);
 		},
 	});
 };
