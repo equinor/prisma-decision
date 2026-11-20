@@ -179,3 +179,12 @@ In the edit issue side sheet, the user can change the Issue and immediately edit
 - The .NET GUID byte order is the most likely source of ID mismatches. The first ID fixture should catch it immediately.
 - The glossary terms used here (**Parent**, **Probability table**, **Utility table**, **Restriction table**, **Table shape**) were added to the glossary during design.
 - The `TableCleanupService` background job (which removes duplicate cells) is unaffected.
+
+## Comments
+
+Decisions made during implementation:
+
+- **Side-sheet table edits are always unsaved values.** The sheet uses its own variant of the composed table, so every table edit in the sheet waits for Update, whether or not the form has changed.
+- **Restriction tables are not updated optimistically.** They are refetched after the change is saved, so the TypeScript port leaves them out and only the API checks the Restriction fixtures.
+- **The API throws when a Focus Decision with no Options becomes a Parent of an Uncertainty that already has cells.** The cause is `AddProbabilitiesColumn` on an empty collection. The TypeScript port returns an empty table instead; there is no fixture for this case.
+- **Policy tables keep the "disabled until saved" banner.** They come from the solver, not from Table shape, so the sheet can't predict them.

@@ -1,7 +1,10 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '../../api';
-import { Edge } from '../../validators';
 import { showErrorToast } from '../../components/ShowToast';
+import {
+	applyOptimisticTables,
+	restoreTables,
+} from '../../utils/tableShapes/applyOptimisticTables';
 
 export const useDeleteEdge = () => {
 	const queryClient = useQueryClient();
@@ -10,25 +13,21 @@ export const useDeleteEdge = () => {
 			const res = await apiClient.delete(`/edges/${id}`);
 			return res.data;
 		},
-		onMutate: (deletedId: string) => {
-			queryClient.cancelQueries({ queryKey: ['edges'] });
-			const previousEdges = queryClient.getQueryData<Edge[]>(['edges']) || [];
-			const updatedEdges = previousEdges.filter(edge => edge.id !== deletedId);
-			queryClient.setQueryData(['edges'], updatedEdges);
-			return { previousEdges };
-		},
+		onMutate: (deletedId: string) =>
+			applyOptimisticTables(queryClient, ({ edges }) => ({
+				edges: edges.filter(edge => edge.id !== deletedId),
+			})),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ['probabilityTables'] });
 			queryClient.invalidateQueries({ queryKey: ['utilityTables'] });
 			queryClient.invalidateQueries({ queryKey: ['decisionTree'] });
 			queryClient.invalidateQueries({ queryKey: ['solution'] });
+			queryClient.invalidateQueries({ queryKey: ['restrictionTables'] });
 			queryClient.refetchQueries({ queryKey: ['issues'] });
 		},
-		onError: (_err, _updatedEdge, context) => {
+		onError: (_err, _deletedId, previous) => {
 			showErrorToast('Failed to delete edge');
-			if (context?.previousEdges) {
-				queryClient.setQueryData(['edges'], context.previousEdges);
-			}
+			restoreTables(queryClient, previous);
 		},
 	});
 };
@@ -42,30 +41,23 @@ export const useBulkDeleteEdges = () => {
 			await apiClient.delete(`/edges?${params.toString()}`);
 		},
 		onMutate: async (ids: string[]) => {
-			await queryClient.cancelQueries({ queryKey: ['edges'] });
-			const previousEdges = queryClient.getQueryData<Edge[]>(['edges']);
-			if (previousEdges) {
-				const deletedIds = new Set(ids);
-				queryClient.setQueryData(
-					['edges'],
-					previousEdges.filter(edge => !deletedIds.has(edge.id)),
-				);
-			}
-			return { previousEdges };
+			const deletedIds = new Set(ids);
+			return applyOptimisticTables(queryClient, ({ edges }) => ({
+				edges: edges.filter(edge => !deletedIds.has(edge.id)),
+			}));
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ['probabilityTables'] });
 			queryClient.invalidateQueries({ queryKey: ['utilityTables'] });
 			queryClient.invalidateQueries({ queryKey: ['decisionTree'] });
 			queryClient.invalidateQueries({ queryKey: ['solution'] });
+			queryClient.invalidateQueries({ queryKey: ['restrictionTables'] });
 			queryClient.refetchQueries({ queryKey: ['issues'] });
 		},
-		onError: (_err, _ids, context) => {
+		onError: (_err, _ids, previous) => {
 			showErrorToast('Failed to delete edges');
-			if (context?.previousEdges) {
-				queryClient.setQueryData(['edges'], context.previousEdges);
-				queryClient.invalidateQueries({ queryKey: ['influenceDiagramLayout'] });
-			}
+			restoreTables(queryClient, previous);
+			queryClient.invalidateQueries({ queryKey: ['influenceDiagramLayout'] });
 		},
 	});
 };
