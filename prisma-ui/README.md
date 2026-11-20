@@ -133,7 +133,7 @@ Radix builds the UI from `radixconfig.yaml` and `radixconfig-public.yaml`:
 | Environment | Trigger                       | DNS Alias                         |
 | ----------- | ----------------------------- | --------------------------------- |
 | **dev**     | Push to `main`                | `prisma-dev.radix.equinor.com`    |
-| **test**    | `prisma-ui-test-v*` tag       | `prisma-test.radix.equinor.com`   |
+| **test**    | `TEST` tag                    | `prisma-test.radix.equinor.com`   |
 | **prod**    | `prisma-ui-v*` release tag    | `prisma.radix.equinor.com`        |
 | **public**  | `PUBLIC` tag                  | `prisma-public.radix.equinor.com` |
 | **design**  | `DESIGN` tag                  |                                   |

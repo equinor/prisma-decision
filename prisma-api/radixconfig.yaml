@@ -9,7 +9,7 @@ spec:
         from: prisma-api-v*
     - name: test
       build:
-        from: prisma-api-test-v*
+        from: TEST
     - name: dev
       build:
         from: main

@@ -11,7 +11,7 @@ spec:
             from: prisma-ui-v*
         - name: test
           build:
-            from: prisma-ui-test-v*
+            from: TEST
         - name: dev
           build:
               from: main
