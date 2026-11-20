@@ -1,0 +1,40 @@
+{
+	"description": "A Utility without Parents has no cells.",
+	"input": {
+		"issues": [
+			{
+				"id": "10a870c7-097c-41f8-9201-d6ec4a9fe395",
+				"project_id": "2161b89a-019c-4ac4-adfc-765c0fa497cf",
+				"type": "Utility",
+				"boundary": "in",
+				"node": {
+					"id": "c1facfd8-e5d4-46c5-9cf3-06984940de55"
+				},
+				"uncertainty": null,
+				"decision": null,
+				"utility": {
+					"id": "06147b1b-de16-4499-a7ba-e889c417a77c"
+				}
+			}
+		],
+		"edges": [],
+		"discrete_probabilities": [],
+		"discrete_utilities": [
+			{
+				"id": "365e0d34-81b1-49bf-8778-ab3af07e1a55",
+				"value_metric_id": "288e0811-7ab6-5d24-b80c-9fa925b848a6",
+				"utility_id": "06147b1b-de16-4499-a7ba-e889c417a77c",
+				"project_id": "2161b89a-019c-4ac4-adfc-765c0fa497cf",
+				"utility_value": 10,
+				"parent_outcome_ids": [],
+				"parent_option_ids": []
+			}
+		],
+		"restriction_tables": []
+	},
+	"expected": {
+		"discrete_probabilities": [],
+		"discrete_utilities": [],
+		"restriction_tables": []
+	}
+}

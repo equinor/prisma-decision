@@ -1,0 +1,211 @@
+{
+	"description": "A Restriction table already in shape is unchanged.",
+	"input": {
+		"issues": [
+			{
+				"id": "319ce7ae-af55-40be-9d1e-ba3b5536f9da",
+				"project_id": "9b1ef267-17f4-4dff-ba46-145e975fefb6",
+				"type": "Decision",
+				"boundary": "on",
+				"node": {
+					"id": "e827def5-4173-45e8-92c0-23173b1a2541"
+				},
+				"uncertainty": null,
+				"decision": {
+					"id": "10783d03-47e7-403d-ba11-ba0e9eafd753",
+					"type": "Focus",
+					"options": [
+						{
+							"id": "56d7a8ae-0a19-429b-bf49-5a1b08c28573"
+						},
+						{
+							"id": "63436647-3d61-4ddf-b506-196ef4e7ce6c"
+						}
+					]
+				},
+				"utility": null
+			},
+			{
+				"id": "c63c78f9-b745-48a8-8dc4-b9a42d294733",
+				"project_id": "9b1ef267-17f4-4dff-ba46-145e975fefb6",
+				"type": "Uncertainty",
+				"boundary": "in",
+				"node": {
+					"id": "c0f08576-7a2d-4aa4-b3f7-e16f0b1e172a"
+				},
+				"uncertainty": {
+					"id": "88a42bb2-66c3-4b6d-b016-c5ca9868265d",
+					"is_key": true,
+					"outcomes": [
+						{
+							"id": "bac65e5c-699e-4d76-a794-4eae518ef4b7"
+						},
+						{
+							"id": "8e05b491-d38d-441c-b95b-6652fb722c44"
+						}
+					]
+				},
+				"decision": null,
+				"utility": null
+			}
+		],
+		"edges": [
+			{
+				"id": "30fee47d-7bed-49f9-8c31-112f109f6ae2",
+				"tail_id": "e827def5-4173-45e8-92c0-23173b1a2541",
+				"head_id": "c0f08576-7a2d-4aa4-b3f7-e16f0b1e172a"
+			}
+		],
+		"discrete_probabilities": [],
+		"discrete_utilities": [],
+		"restriction_tables": [
+			{
+				"id": "b3bf5d88-9dc8-4a96-898f-e9596f792cb7",
+				"project_id": "9b1ef267-17f4-4dff-ba46-145e975fefb6",
+				"edge_id": "30fee47d-7bed-49f9-8c31-112f109f6ae2",
+				"name": "Restriction",
+				"restriction_entries": [
+					{
+						"id": "b76a5f1e-7b3d-4003-a368-7e747a92f42b",
+						"project_id": "9b1ef267-17f4-4dff-ba46-145e975fefb6",
+						"restriction_table_id": "b3bf5d88-9dc8-4a96-898f-e9596f792cb7",
+						"restriction_value": 1,
+						"parent_state_id": "56d7a8ae-0a19-429b-bf49-5a1b08c28573",
+						"is_parent_uncertainty": false,
+						"child_state_id": "bac65e5c-699e-4d76-a794-4eae518ef4b7",
+						"is_child_uncertainty": true
+					},
+					{
+						"id": "d7eac193-93cf-4042-acdd-baaabe24fa9d",
+						"project_id": "9b1ef267-17f4-4dff-ba46-145e975fefb6",
+						"restriction_table_id": "b3bf5d88-9dc8-4a96-898f-e9596f792cb7",
+						"restriction_value": 0,
+						"parent_state_id": "56d7a8ae-0a19-429b-bf49-5a1b08c28573",
+						"is_parent_uncertainty": false,
+						"child_state_id": "8e05b491-d38d-441c-b95b-6652fb722c44",
+						"is_child_uncertainty": true
+					},
+					{
+						"id": "e123ddec-77ea-4d06-8c7f-520be952e2d1",
+						"project_id": "9b1ef267-17f4-4dff-ba46-145e975fefb6",
+						"restriction_table_id": "b3bf5d88-9dc8-4a96-898f-e9596f792cb7",
+						"restriction_value": 1,
+						"parent_state_id": "63436647-3d61-4ddf-b506-196ef4e7ce6c",
+						"is_parent_uncertainty": false,
+						"child_state_id": "bac65e5c-699e-4d76-a794-4eae518ef4b7",
+						"is_child_uncertainty": true
+					},
+					{
+						"id": "9a139948-b355-482a-a26b-95c87a4171a1",
+						"project_id": "9b1ef267-17f4-4dff-ba46-145e975fefb6",
+						"restriction_table_id": "b3bf5d88-9dc8-4a96-898f-e9596f792cb7",
+						"restriction_value": 0,
+						"parent_state_id": "63436647-3d61-4ddf-b506-196ef4e7ce6c",
+						"is_parent_uncertainty": false,
+						"child_state_id": "8e05b491-d38d-441c-b95b-6652fb722c44",
+						"is_child_uncertainty": true
+					}
+				]
+			}
+		]
+	},
+	"expected": {
+		"discrete_probabilities": [
+			{
+				"id": "54aa369a-b83c-fe85-49ac-132dac953f5d",
+				"outcome_id": "bac65e5c-699e-4d76-a794-4eae518ef4b7",
+				"uncertainty_id": "88a42bb2-66c3-4b6d-b016-c5ca9868265d",
+				"project_id": "9b1ef267-17f4-4dff-ba46-145e975fefb6",
+				"probability": 0,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"56d7a8ae-0a19-429b-bf49-5a1b08c28573"
+				]
+			},
+			{
+				"id": "68c62fb4-7f26-ad1a-6876-31e24c366633",
+				"outcome_id": "bac65e5c-699e-4d76-a794-4eae518ef4b7",
+				"uncertainty_id": "88a42bb2-66c3-4b6d-b016-c5ca9868265d",
+				"project_id": "9b1ef267-17f4-4dff-ba46-145e975fefb6",
+				"probability": 0,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"63436647-3d61-4ddf-b506-196ef4e7ce6c"
+				]
+			},
+			{
+				"id": "7aee22f2-8fd0-47ef-4fc5-93d9ce93b4f9",
+				"outcome_id": "8e05b491-d38d-441c-b95b-6652fb722c44",
+				"uncertainty_id": "88a42bb2-66c3-4b6d-b016-c5ca9868265d",
+				"project_id": "9b1ef267-17f4-4dff-ba46-145e975fefb6",
+				"probability": 0,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"56d7a8ae-0a19-429b-bf49-5a1b08c28573"
+				]
+			},
+			{
+				"id": "fd54256c-a131-98e6-7095-cfa60e03589f",
+				"outcome_id": "8e05b491-d38d-441c-b95b-6652fb722c44",
+				"uncertainty_id": "88a42bb2-66c3-4b6d-b016-c5ca9868265d",
+				"project_id": "9b1ef267-17f4-4dff-ba46-145e975fefb6",
+				"probability": 0,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"63436647-3d61-4ddf-b506-196ef4e7ce6c"
+				]
+			}
+		],
+		"discrete_utilities": [],
+		"restriction_tables": [
+			{
+				"restriction_entries": [
+					{
+						"id": "9a139948-b355-482a-a26b-95c87a4171a1",
+						"project_id": "9b1ef267-17f4-4dff-ba46-145e975fefb6",
+						"restriction_value": 0,
+						"parent_state_id": "63436647-3d61-4ddf-b506-196ef4e7ce6c",
+						"is_parent_uncertainty": false,
+						"child_state_id": "8e05b491-d38d-441c-b95b-6652fb722c44",
+						"is_child_uncertainty": true,
+						"restriction_table_id": "b3bf5d88-9dc8-4a96-898f-e9596f792cb7"
+					},
+					{
+						"id": "b76a5f1e-7b3d-4003-a368-7e747a92f42b",
+						"project_id": "9b1ef267-17f4-4dff-ba46-145e975fefb6",
+						"restriction_value": 1,
+						"parent_state_id": "56d7a8ae-0a19-429b-bf49-5a1b08c28573",
+						"is_parent_uncertainty": false,
+						"child_state_id": "bac65e5c-699e-4d76-a794-4eae518ef4b7",
+						"is_child_uncertainty": true,
+						"restriction_table_id": "b3bf5d88-9dc8-4a96-898f-e9596f792cb7"
+					},
+					{
+						"id": "d7eac193-93cf-4042-acdd-baaabe24fa9d",
+						"project_id": "9b1ef267-17f4-4dff-ba46-145e975fefb6",
+						"restriction_value": 0,
+						"parent_state_id": "56d7a8ae-0a19-429b-bf49-5a1b08c28573",
+						"is_parent_uncertainty": false,
+						"child_state_id": "8e05b491-d38d-441c-b95b-6652fb722c44",
+						"is_child_uncertainty": true,
+						"restriction_table_id": "b3bf5d88-9dc8-4a96-898f-e9596f792cb7"
+					},
+					{
+						"id": "e123ddec-77ea-4d06-8c7f-520be952e2d1",
+						"project_id": "9b1ef267-17f4-4dff-ba46-145e975fefb6",
+						"restriction_value": 1,
+						"parent_state_id": "63436647-3d61-4ddf-b506-196ef4e7ce6c",
+						"is_parent_uncertainty": false,
+						"child_state_id": "bac65e5c-699e-4d76-a794-4eae518ef4b7",
+						"is_child_uncertainty": true,
+						"restriction_table_id": "b3bf5d88-9dc8-4a96-898f-e9596f792cb7"
+					}
+				],
+				"id": "b3bf5d88-9dc8-4a96-898f-e9596f792cb7",
+				"project_id": "9b1ef267-17f4-4dff-ba46-145e975fefb6",
+				"edge_id": "30fee47d-7bed-49f9-8c31-112f109f6ae2",
+				"name": "Restriction"
+			}
+		]
+	}
+}

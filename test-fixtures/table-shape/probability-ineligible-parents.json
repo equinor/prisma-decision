@@ -1,0 +1,297 @@
+{
+	"description": "Out-of-Boundary, non-key, non-Focus, Fact and Utility Issues are not Parents.",
+	"input": {
+		"issues": [
+			{
+				"id": "8785a97f-5287-4d33-9a9c-7a8cf1fc3405",
+				"project_id": "07661b38-2bcf-412d-a56d-759184338249",
+				"type": "Uncertainty",
+				"boundary": "out",
+				"node": {
+					"id": "4c1a222f-10d3-4f43-8637-7825634f004f"
+				},
+				"uncertainty": {
+					"id": "a1abed9a-f944-4b63-a59c-d6a51061d864",
+					"is_key": true,
+					"outcomes": [
+						{
+							"id": "b3e18f61-9e71-4350-b5de-31ea89bbcbca"
+						},
+						{
+							"id": "47d64209-72f2-42b2-9c46-74b79086a704"
+						}
+					]
+				},
+				"decision": null,
+				"utility": null
+			},
+			{
+				"id": "d557be1e-33b6-4a23-a359-e22b701b849c",
+				"project_id": "07661b38-2bcf-412d-a56d-759184338249",
+				"type": "Uncertainty",
+				"boundary": "in",
+				"node": {
+					"id": "fdbce96c-94f2-4a13-8089-d8be171d90dc"
+				},
+				"uncertainty": {
+					"id": "399a9485-4580-43ef-a2a3-a5ba86434d16",
+					"is_key": false,
+					"outcomes": [
+						{
+							"id": "bd82b4af-24f0-4931-ab6f-b337d1334ec0"
+						},
+						{
+							"id": "a26295d7-31a7-474d-8de7-39c8014f2f46"
+						}
+					]
+				},
+				"decision": null,
+				"utility": null
+			},
+			{
+				"id": "1e1cd852-ba2e-4d66-9c76-513cba24188e",
+				"project_id": "07661b38-2bcf-412d-a56d-759184338249",
+				"type": "Decision",
+				"boundary": "on",
+				"node": {
+					"id": "a63845f9-3326-4a78-9a87-a5337af14ac7"
+				},
+				"uncertainty": null,
+				"decision": {
+					"id": "f5cc5828-00d5-414a-bbfd-2db2c8c73f60",
+					"type": "Tactical",
+					"options": [
+						{
+							"id": "d5787528-af1d-4fab-9319-0c49a419a6a7"
+						},
+						{
+							"id": "75ac40de-a8b2-47bd-8b4a-24a990945a02"
+						}
+					]
+				},
+				"utility": null
+			},
+			{
+				"id": "781b0e71-63f3-415e-9cf0-211b1e4497fe",
+				"project_id": "07661b38-2bcf-412d-a56d-759184338249",
+				"type": "Decision",
+				"boundary": "on",
+				"node": {
+					"id": "7232effa-cd06-467f-906b-692490df5b0d"
+				},
+				"uncertainty": null,
+				"decision": {
+					"id": "ce1a5641-1d6e-47a9-b1f8-18c6b83bfe3c",
+					"type": "Policy",
+					"options": [
+						{
+							"id": "5b6a1950-daf1-4965-b4ad-ab7e8f3cc800"
+						},
+						{
+							"id": "c10d832a-98ff-4f7c-a49c-3bd7dc068088"
+						}
+					]
+				},
+				"utility": null
+			},
+			{
+				"id": "4e672144-2c3f-49f6-967a-99f3479591d9",
+				"project_id": "07661b38-2bcf-412d-a56d-759184338249",
+				"type": "Fact",
+				"boundary": "in",
+				"node": {
+					"id": "bcbe0f48-40c7-41cb-9e38-d2672b6ae623"
+				},
+				"uncertainty": null,
+				"decision": null,
+				"utility": null
+			},
+			{
+				"id": "41dd198a-6f78-4def-a99a-c0decac8ed23",
+				"project_id": "07661b38-2bcf-412d-a56d-759184338249",
+				"type": "Utility",
+				"boundary": "in",
+				"node": {
+					"id": "891e428b-59ce-4667-846a-cdc5de49a67c"
+				},
+				"uncertainty": null,
+				"decision": null,
+				"utility": {
+					"id": "f767614c-1e14-47f9-9675-53dce69c7933"
+				}
+			},
+			{
+				"id": "f495c3d3-4a9f-4a27-8ebb-ee331b49c07b",
+				"project_id": "07661b38-2bcf-412d-a56d-759184338249",
+				"type": "Decision",
+				"boundary": "on",
+				"node": {
+					"id": "e321407b-3365-43cc-820f-8dfeb28fd68d"
+				},
+				"uncertainty": null,
+				"decision": {
+					"id": "26695307-e47f-47c9-b2c7-6d304dff0dd9",
+					"type": "Focus",
+					"options": [
+						{
+							"id": "0ce26602-a255-41d1-95b7-aecaf44ebc34"
+						},
+						{
+							"id": "00309302-531e-4f3a-b9bb-b55f5cd0d685"
+						}
+					]
+				},
+				"utility": null
+			},
+			{
+				"id": "8614cd1c-52b3-41fe-8d85-98ad8191ae02",
+				"project_id": "07661b38-2bcf-412d-a56d-759184338249",
+				"type": "Uncertainty",
+				"boundary": "in",
+				"node": {
+					"id": "49184ac4-e04f-4435-a8fb-090ea3afee0d"
+				},
+				"uncertainty": {
+					"id": "82feec1f-e89b-4bc3-a080-3d3c52fd88c1",
+					"is_key": true,
+					"outcomes": [
+						{
+							"id": "af3346a5-8875-4b6f-b447-d00c55466c0a"
+						},
+						{
+							"id": "8387dbba-2f3b-48c5-b7d4-5f77315d9462"
+						}
+					]
+				},
+				"decision": null,
+				"utility": null
+			}
+		],
+		"edges": [
+			{
+				"id": "4acae403-0d72-4592-9151-83ed70a7d5e0",
+				"tail_id": "4c1a222f-10d3-4f43-8637-7825634f004f",
+				"head_id": "49184ac4-e04f-4435-a8fb-090ea3afee0d"
+			},
+			{
+				"id": "c117eeae-4273-4c43-9033-521800c791e6",
+				"tail_id": "fdbce96c-94f2-4a13-8089-d8be171d90dc",
+				"head_id": "49184ac4-e04f-4435-a8fb-090ea3afee0d"
+			},
+			{
+				"id": "3034063a-71db-408b-8e42-4226fa460a97",
+				"tail_id": "a63845f9-3326-4a78-9a87-a5337af14ac7",
+				"head_id": "49184ac4-e04f-4435-a8fb-090ea3afee0d"
+			},
+			{
+				"id": "d9495f02-ba5f-4318-afa9-e35cb3d4ed95",
+				"tail_id": "7232effa-cd06-467f-906b-692490df5b0d",
+				"head_id": "49184ac4-e04f-4435-a8fb-090ea3afee0d"
+			},
+			{
+				"id": "8c34c20f-0631-4bfa-8795-f38312297b17",
+				"tail_id": "bcbe0f48-40c7-41cb-9e38-d2672b6ae623",
+				"head_id": "49184ac4-e04f-4435-a8fb-090ea3afee0d"
+			},
+			{
+				"id": "200f61de-726d-46da-9568-76086d7c26f3",
+				"tail_id": "891e428b-59ce-4667-846a-cdc5de49a67c",
+				"head_id": "49184ac4-e04f-4435-a8fb-090ea3afee0d"
+			},
+			{
+				"id": "ff67e72e-68ab-4393-9bd7-6d846c46be92",
+				"tail_id": "e321407b-3365-43cc-820f-8dfeb28fd68d",
+				"head_id": "49184ac4-e04f-4435-a8fb-090ea3afee0d"
+			}
+		],
+		"discrete_probabilities": [],
+		"discrete_utilities": [],
+		"restriction_tables": []
+	},
+	"expected": {
+		"discrete_probabilities": [
+			{
+				"id": "041e03c5-e71d-d663-3a4a-50616bc058c7",
+				"outcome_id": "bd82b4af-24f0-4931-ab6f-b337d1334ec0",
+				"uncertainty_id": "399a9485-4580-43ef-a2a3-a5ba86434d16",
+				"project_id": "07661b38-2bcf-412d-a56d-759184338249",
+				"probability": 0,
+				"parent_outcome_ids": [],
+				"parent_option_ids": []
+			},
+			{
+				"id": "19a32f47-2f18-c3cb-1bc0-d38801b32199",
+				"outcome_id": "af3346a5-8875-4b6f-b447-d00c55466c0a",
+				"uncertainty_id": "82feec1f-e89b-4bc3-a080-3d3c52fd88c1",
+				"project_id": "07661b38-2bcf-412d-a56d-759184338249",
+				"probability": 0,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"00309302-531e-4f3a-b9bb-b55f5cd0d685"
+				]
+			},
+			{
+				"id": "1df6ea02-15a2-aea8-47e4-a502162e5c59",
+				"outcome_id": "af3346a5-8875-4b6f-b447-d00c55466c0a",
+				"uncertainty_id": "82feec1f-e89b-4bc3-a080-3d3c52fd88c1",
+				"project_id": "07661b38-2bcf-412d-a56d-759184338249",
+				"probability": 0,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"0ce26602-a255-41d1-95b7-aecaf44ebc34"
+				]
+			},
+			{
+				"id": "36b4b087-55ee-e964-9652-cf6b03fd2bee",
+				"outcome_id": "8387dbba-2f3b-48c5-b7d4-5f77315d9462",
+				"uncertainty_id": "82feec1f-e89b-4bc3-a080-3d3c52fd88c1",
+				"project_id": "07661b38-2bcf-412d-a56d-759184338249",
+				"probability": 0,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"00309302-531e-4f3a-b9bb-b55f5cd0d685"
+				]
+			},
+			{
+				"id": "61eb0a19-d3e8-81d6-58ee-83f21def6a8d",
+				"outcome_id": "47d64209-72f2-42b2-9c46-74b79086a704",
+				"uncertainty_id": "a1abed9a-f944-4b63-a59c-d6a51061d864",
+				"project_id": "07661b38-2bcf-412d-a56d-759184338249",
+				"probability": 0,
+				"parent_outcome_ids": [],
+				"parent_option_ids": []
+			},
+			{
+				"id": "62f6d05a-9523-75c8-20ca-32214ef95450",
+				"outcome_id": "8387dbba-2f3b-48c5-b7d4-5f77315d9462",
+				"uncertainty_id": "82feec1f-e89b-4bc3-a080-3d3c52fd88c1",
+				"project_id": "07661b38-2bcf-412d-a56d-759184338249",
+				"probability": 0,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"0ce26602-a255-41d1-95b7-aecaf44ebc34"
+				]
+			},
+			{
+				"id": "9bbfc72f-6440-4b83-724a-7d6bb133fce6",
+				"outcome_id": "b3e18f61-9e71-4350-b5de-31ea89bbcbca",
+				"uncertainty_id": "a1abed9a-f944-4b63-a59c-d6a51061d864",
+				"project_id": "07661b38-2bcf-412d-a56d-759184338249",
+				"probability": 0,
+				"parent_outcome_ids": [],
+				"parent_option_ids": []
+			},
+			{
+				"id": "f5841efe-4f1e-ae7b-1b52-a8ca93371119",
+				"outcome_id": "a26295d7-31a7-474d-8de7-39c8014f2f46",
+				"uncertainty_id": "399a9485-4580-43ef-a2a3-a5ba86434d16",
+				"project_id": "07661b38-2bcf-412d-a56d-759184338249",
+				"probability": 0,
+				"parent_outcome_ids": [],
+				"parent_option_ids": []
+			}
+		],
+		"discrete_utilities": [],
+		"restriction_tables": []
+	}
+}

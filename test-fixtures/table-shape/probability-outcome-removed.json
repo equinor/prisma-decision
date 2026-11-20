@@ -1,0 +1,180 @@
+{
+	"description": "Cells for a removed Outcome are dropped.",
+	"input": {
+		"issues": [
+			{
+				"id": "a51310e2-e9ba-4cbf-b9cf-6759b1154109",
+				"project_id": "da8df51b-cdd3-4d35-9fec-aca6c99f9ebb",
+				"type": "Decision",
+				"boundary": "on",
+				"node": {
+					"id": "c8fcfe5d-3b75-457f-9180-3924c54ed7b3"
+				},
+				"uncertainty": null,
+				"decision": {
+					"id": "46d63d61-06bf-4f93-af42-af36b79f3777",
+					"type": "Focus",
+					"options": [
+						{
+							"id": "7081f6fd-2b78-4123-89fa-3cfb19fab8cb"
+						},
+						{
+							"id": "ea020dc5-61f2-4587-b8d4-44e41274d589"
+						}
+					]
+				},
+				"utility": null
+			},
+			{
+				"id": "3931a9b8-3876-4a07-981c-b119508a14b5",
+				"project_id": "da8df51b-cdd3-4d35-9fec-aca6c99f9ebb",
+				"type": "Uncertainty",
+				"boundary": "in",
+				"node": {
+					"id": "5688fb5b-0814-489a-9f6d-1520ae0c8c49"
+				},
+				"uncertainty": {
+					"id": "b10501d5-8cec-4822-b6d8-fe58c3564a3a",
+					"is_key": true,
+					"outcomes": [
+						{
+							"id": "7ab946bd-8751-4063-bc32-dd6fe2ce2be9"
+						},
+						{
+							"id": "59719fc9-c9e0-4e69-bde6-7d676acc2a66"
+						}
+					]
+				},
+				"decision": null,
+				"utility": null
+			}
+		],
+		"edges": [
+			{
+				"id": "7ad391e6-5567-4675-a20e-a008b312b034",
+				"tail_id": "c8fcfe5d-3b75-457f-9180-3924c54ed7b3",
+				"head_id": "5688fb5b-0814-489a-9f6d-1520ae0c8c49"
+			}
+		],
+		"discrete_probabilities": [
+			{
+				"id": "3b1e17ba-9f9f-4221-963f-36165dc04141",
+				"outcome_id": "7ab946bd-8751-4063-bc32-dd6fe2ce2be9",
+				"uncertainty_id": "b10501d5-8cec-4822-b6d8-fe58c3564a3a",
+				"project_id": "da8df51b-cdd3-4d35-9fec-aca6c99f9ebb",
+				"probability": 0.25,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"7081f6fd-2b78-4123-89fa-3cfb19fab8cb"
+				]
+			},
+			{
+				"id": "a4767388-f3e5-435b-93a1-bb0c69fb692d",
+				"outcome_id": "59719fc9-c9e0-4e69-bde6-7d676acc2a66",
+				"uncertainty_id": "b10501d5-8cec-4822-b6d8-fe58c3564a3a",
+				"project_id": "da8df51b-cdd3-4d35-9fec-aca6c99f9ebb",
+				"probability": 0.5,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"7081f6fd-2b78-4123-89fa-3cfb19fab8cb"
+				]
+			},
+			{
+				"id": "dc972dfb-aada-47a9-a8f5-6a67aacef58e",
+				"outcome_id": "717d49bb-9b64-4e21-ab0e-02d14d59e230",
+				"uncertainty_id": "b10501d5-8cec-4822-b6d8-fe58c3564a3a",
+				"project_id": "da8df51b-cdd3-4d35-9fec-aca6c99f9ebb",
+				"probability": 0.125,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"7081f6fd-2b78-4123-89fa-3cfb19fab8cb"
+				]
+			},
+			{
+				"id": "b832a5b9-88d2-41b1-b544-51ec4b8576df",
+				"outcome_id": "7ab946bd-8751-4063-bc32-dd6fe2ce2be9",
+				"uncertainty_id": "b10501d5-8cec-4822-b6d8-fe58c3564a3a",
+				"project_id": "da8df51b-cdd3-4d35-9fec-aca6c99f9ebb",
+				"probability": 0.375,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"ea020dc5-61f2-4587-b8d4-44e41274d589"
+				]
+			},
+			{
+				"id": "c8d5688d-682d-42b5-81db-24575570f537",
+				"outcome_id": "59719fc9-c9e0-4e69-bde6-7d676acc2a66",
+				"uncertainty_id": "b10501d5-8cec-4822-b6d8-fe58c3564a3a",
+				"project_id": "da8df51b-cdd3-4d35-9fec-aca6c99f9ebb",
+				"probability": 0.25,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"ea020dc5-61f2-4587-b8d4-44e41274d589"
+				]
+			},
+			{
+				"id": "164a9c2b-6277-47a8-85c2-00b0eb99b473",
+				"outcome_id": "717d49bb-9b64-4e21-ab0e-02d14d59e230",
+				"uncertainty_id": "b10501d5-8cec-4822-b6d8-fe58c3564a3a",
+				"project_id": "da8df51b-cdd3-4d35-9fec-aca6c99f9ebb",
+				"probability": 0.5,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"ea020dc5-61f2-4587-b8d4-44e41274d589"
+				]
+			}
+		],
+		"discrete_utilities": [],
+		"restriction_tables": []
+	},
+	"expected": {
+		"discrete_probabilities": [
+			{
+				"id": "3b1e17ba-9f9f-4221-963f-36165dc04141",
+				"outcome_id": "7ab946bd-8751-4063-bc32-dd6fe2ce2be9",
+				"uncertainty_id": "b10501d5-8cec-4822-b6d8-fe58c3564a3a",
+				"project_id": "da8df51b-cdd3-4d35-9fec-aca6c99f9ebb",
+				"probability": 0.25,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"7081f6fd-2b78-4123-89fa-3cfb19fab8cb"
+				]
+			},
+			{
+				"id": "a4767388-f3e5-435b-93a1-bb0c69fb692d",
+				"outcome_id": "59719fc9-c9e0-4e69-bde6-7d676acc2a66",
+				"uncertainty_id": "b10501d5-8cec-4822-b6d8-fe58c3564a3a",
+				"project_id": "da8df51b-cdd3-4d35-9fec-aca6c99f9ebb",
+				"probability": 0.5,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"7081f6fd-2b78-4123-89fa-3cfb19fab8cb"
+				]
+			},
+			{
+				"id": "b832a5b9-88d2-41b1-b544-51ec4b8576df",
+				"outcome_id": "7ab946bd-8751-4063-bc32-dd6fe2ce2be9",
+				"uncertainty_id": "b10501d5-8cec-4822-b6d8-fe58c3564a3a",
+				"project_id": "da8df51b-cdd3-4d35-9fec-aca6c99f9ebb",
+				"probability": 0.375,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"ea020dc5-61f2-4587-b8d4-44e41274d589"
+				]
+			},
+			{
+				"id": "c8d5688d-682d-42b5-81db-24575570f537",
+				"outcome_id": "59719fc9-c9e0-4e69-bde6-7d676acc2a66",
+				"uncertainty_id": "b10501d5-8cec-4822-b6d8-fe58c3564a3a",
+				"project_id": "da8df51b-cdd3-4d35-9fec-aca6c99f9ebb",
+				"probability": 0.25,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"ea020dc5-61f2-4587-b8d4-44e41274d589"
+				]
+			}
+		],
+		"discrete_utilities": [],
+		"restriction_tables": []
+	}
+}

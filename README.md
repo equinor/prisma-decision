@@ -28,6 +28,7 @@ Useful tasks:
 | `mise run research` | Run the solver, API and UI in Docker in Research mode (no sign-in); needs Docker |
 | `mise run check` | Run the same API and UI checks as CI |
 | `mise run test` | Run all API, solver and UI tests |
+| `mise run test:parity` | Run the shared Table shape fixtures against the API and UI implementations |
 | `mise run db:migration:add <name>` | Add an EF Core migration for SQLite and SQL Server |
 
 Run `mise tasks` to list all available tasks.
