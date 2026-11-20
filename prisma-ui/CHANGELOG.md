@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.1](https://github.com/equinor/prisma-decision/compare/prisma-ui-v1.1.0...prisma-ui-v1.1.1) (2026-11-20)
+
+
+### Continuous Integration
+
+* deploy test from a shared TEST tag like PUBLIC and DESIGN ([1b3b774](https://github.com/equinor/prisma-decision/commit/1b3b774c37ca4e3b74c7e15baf4f2f1251abc3d9))
+
+
+### Miscellaneous Chores
+
+* add release:ai task to move the AI tag ([b88557f](https://github.com/equinor/prisma-decision/commit/b88557faf07c8377b2a2cf852f9a6b6e806f55b0))
+
 ## [1.1.0](https://github.com/equinor/prisma-decision-web/compare/v1.0.0...v1.1.0) (2026-09-03)
 
 
