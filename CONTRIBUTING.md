@@ -26,7 +26,7 @@ Install [mise](https://mise.jdx.dev/) and follow [Getting started](README.md#get
 
 - **UI** — Prettier (tabs, single quotes, print width 100, see [prisma-ui/.prettierrc.json](prisma-ui/.prettierrc.json)) and TypeScript-aware ESLint with React hooks and refresh plugins
 - **Solver** — Black (line length 100) and Flake8, run by the pre-commit hooks
-- **API** — conventions are described in [prisma-api/AGENTS.md](prisma-api/AGENTS.md)
+- **API** — conventions are described in [prisma-api/CODING_STANDARDS.md](prisma-api/CODING_STANDARDS.md)
 
 Run the same checks as CI:
 

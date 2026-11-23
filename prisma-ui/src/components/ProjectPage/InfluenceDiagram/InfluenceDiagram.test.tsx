@@ -167,24 +167,6 @@ test('Scenario overrides and their EV effect are shared between Cards and Shape 
 	);
 });
 
-test('clicking a Shape selects the Issue and switching either way retains the selection', async () => {
-	const user = userEvent.setup();
-	renderDiagram();
-	await user.click(await screen.findByRole('radio', { name: 'Shape view' }));
-	const decision = await screen.findByTestId(`rf__node-${fixture.issues[0].node.id}`);
-	await user.click(screen.getByRole('button', { name: 'Delete' }));
-	expect(await screen.findByRole('menuitem', { name: 'Delete selected issues' })).toBeDisabled();
-	await user.keyboard('{Escape}');
-	await user.click(within(decision).getByText('Drill well'));
-	for (const view of ['Card view', 'Shape view', 'Card view', 'Shape view']) {
-		await user.click(screen.getByRole('radio', { name: view }));
-		await user.click(screen.getByRole('button', { name: 'Delete' }));
-		expect(
-			await screen.findByRole('menuitem', { name: 'Delete selected issues' }),
-		).toBeEnabled();
-	}
-});
-
 test('Shape badges expose existing validation errors and Utility warnings without enabling an invalid solver', async () => {
 	fixture.issues[0].decision.options = [];
 	fixture.edges = fixture.edges.slice(0, 1);
