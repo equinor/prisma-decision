@@ -154,24 +154,3 @@ test('keeps strokes visible when an optional color is absent', () => {
 		whiteboardNodeStrokeColor,
 	);
 });
-
-test.each(['Solid', undefined] as const)(
-	'preserves the appearance of saved legacy outlines with style %s',
-	stroke_style => {
-		const { container } = render(
-			<FreehandNode
-				{...nodeProps}
-				data={{
-					...node,
-					data: 'M0,0 Q50,0 100,0 T100,2 50,2 0,2 Z',
-					stroke_style,
-					stroke_width: SMALL_STROKE_WIDTH,
-				}}
-			/>,
-		);
-		const visiblePath = container.querySelector('path[stroke="#ff9200"]');
-		expect(visiblePath).toHaveAttribute('fill', '#ff9200');
-		expect(visiblePath).toHaveAttribute('stroke-width', '0');
-		expect(visiblePath).toHaveAttribute('d', 'M0,0 Q50,0 100,0 T100,2 50,2 0,2 Z');
-	},
-);

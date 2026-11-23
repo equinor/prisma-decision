@@ -83,29 +83,6 @@ export const createFreehandGeometry = (
 	};
 };
 
-export const isLegacyFreehandPath = (path: string) => /z\s*$/i.test(path);
-
-export const getFreehandStrokePath = (path: string) => {
-	if (!isLegacyFreehandPath(path)) return path;
-
-	const outline = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-	outline.setAttribute('d', path);
-	const length = outline.getTotalLength();
-	const sampleCount = Math.max(1, Math.min(2048, Math.ceil(length / 4)));
-	const points: FreehandInputPoint[] = [];
-
-	// Legacy drawings only retain an outline. Approximate its centerline by
-	// averaging samples traversing the two sides in opposite directions.
-	for (let index = 0; index <= sampleCount; index += 1) {
-		const distance = (length * index) / (2 * sampleCount);
-		const first = outline.getPointAtLength(distance);
-		const second = outline.getPointAtLength(length - distance);
-		points.push([average(first.x, second.x), average(first.y, second.y)]);
-	}
-
-	return getSvgPathFromStroke(points);
-};
-
 export const scaleFreehandPath = (path: string, scaleX: number, scaleY: number) => {
 	return path.replace(
 		/(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/g,
