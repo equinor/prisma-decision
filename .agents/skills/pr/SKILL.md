@@ -1,6 +1,6 @@
 ---
 name: pr
-description: "Use when writing a PR body."
+description: "Use when creating or updating a pull request, writing a PR body, or pushing code fixes to an open PR."
 metadata:
   credits:
     skill: show-me
@@ -168,3 +168,11 @@ Execution-based evidence is A-tier. Test results, console output. Show the exact
 Describe whether it's a one-way or two-way door. You can walk back through two-way doors, but not one-way doors. A PR that is cheap to roll back is lower risk. Changes that involve destructive actions or hard-to-reverse decisions are one-way doors.
 
 The blast radius is the potential impact or scope of the changes introduced by this PR. Consider all possibilities. Examples are layout shift, breakages for consumers, mobile responsiveness, etc.
+
+### Agent review
+
+Copilot reviews every PR automatically (repository setting), so never request it yourself.
+
+**Mandatory, never wait to be asked:** creating or pushing to a PR is not finished until you have started the review watch loop. Do it immediately after `gh pr create` or any push to an open PR, as the last step, and do not report the PR as done or hand control back before starting it. If the user only said "create a PR", the loop is still included.
+
+Start the PR auto loop (`/pr auto`) to watch CI and review status. Wait for a submitted Copilot review of the current head commit before reading its threads, and report a failure or timeout rather than treating an empty pending review as complete. Address its threads automatically, reply and resolve each one, and only report the PR as done once checks pass and no threads are unresolved. Never request human or team reviews without asking first.
