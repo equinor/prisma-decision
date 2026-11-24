@@ -1,0 +1,26 @@
+name: Copilot Review
+on:
+    # pull_request_target so fork PRs get a token that can request reviewers.
+    # Safe: no checkout or execution of PR code.
+    pull_request_target:
+        types: [opened, reopened, ready_for_review]
+
+permissions: {}
+
+jobs:
+    request-review:
+        name: Request Copilot review
+        if: github.event.pull_request.user.type != 'Bot' && !github.event.pull_request.draft
+        runs-on: ubuntu-latest
+        timeout-minutes: 5
+        permissions:
+            pull-requests: write
+        steps:
+            - name: Request review from Copilot
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  PR_NUMBER: ${{ github.event.pull_request.number }}
+              run: |
+                  gh api --method POST \
+                      "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}/requested_reviewers" \
+                      -f 'reviewers[]=copilot-pull-request-reviewer[bot]'
