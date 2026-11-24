@@ -100,7 +100,7 @@ test('alternate column views only group their relevant issue classification', as
 	);
 	expect(screen.queryByText(uncertainty.name)).not.toBeInTheDocument();
 
-	await user.click(screen.getByRole('button', { name: 'Add issue at top of Focus' }));
+	await user.click(screen.getByRole('button', { name: 'Add decision to Focus' }));
 	let draftForm = screen.getByRole('form', { name: 'NEW DECISION' });
 	await user.type(within(draftForm).getByRole('textbox', { name: 'Name' }), 'Focus decision');
 	await user.type(
