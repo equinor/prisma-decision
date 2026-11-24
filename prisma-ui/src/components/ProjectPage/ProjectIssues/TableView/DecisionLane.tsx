@@ -15,8 +15,9 @@ const laneDescriptions: Record<DecisionType, string> = {
 	Tactical: 'Decide later',
 };
 
-// Sizes assume every card is 152px tall: a lane fits at least one row
-// (152 + 16px padding = 168px) and switches to two rows at 2 × 152 + 8px gap + 16px = 328px.
+// Sizes assume every card is 152px tall, plus 16px padding and 16px for a horizontal
+// scrollbar: a lane fits at least one row (184px) and switches to two rows at
+// 2 × 152 + 8px gap + 32px = 344px.
 export const DecisionLane = ({
 	decisionType,
 	issues = [],
@@ -36,7 +37,7 @@ export const DecisionLane = ({
 	return (
 		<section
 			aria-label={`${decisionType} issues`}
-			className='flex min-h-42 flex-1 basis-0 items-center gap-4'
+			className='flex min-h-46 flex-1 basis-0 items-center gap-4'
 		>
 			<div className='flex w-40 shrink-0 flex-col gap-2 pt-2'>
 				<div className='flex items-center justify-between'>
@@ -79,7 +80,7 @@ export const DecisionLane = ({
 							No {decisionType} decisions. Drag a decision here or use Add decision.
 						</p>
 					)}
-					<div className='inline-grid shrink-0 auto-cols-[300px] grid-flow-col grid-rows-1 items-start gap-2 [@container(min-height:328px)]:grid-rows-2'>
+					<div className='inline-grid shrink-0 auto-cols-[300px] grid-flow-col grid-rows-1 items-start gap-2 [@container(min-height:344px)]:grid-rows-2'>
 						{isDrafting && (
 							<IssueDraftCard
 								issueType='Decision'
