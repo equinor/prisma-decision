@@ -5,7 +5,6 @@ import { useGetIssues } from '../../hooks/api/useGetIssues';
 import { useGetProjects } from '../../hooks/api/useGetProjects';
 import { LoadingSpinner } from '../common/LoadingSpinner';
 import { ProjectContext } from './ProjectContext';
-import { BottomNavigation } from '../common/BottomNavigation';
 import { Button } from '@equinor/eds-core-react';
 
 export const ProjectPage = () => {
@@ -40,7 +39,6 @@ export const ProjectPage = () => {
 			<div className='mx-auto w-[min(2400px,90%)]'>
 				<Outlet />
 			</div>
-			<BottomNavigation />
 		</ProjectContext>
 	);
 };
