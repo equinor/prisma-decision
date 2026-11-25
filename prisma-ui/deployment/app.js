@@ -22,6 +22,9 @@ const connectSources = [
 	'https://api-prisma-decision-api-test.c3.radix.equinor.com',
 	'https://api-prisma-decision-api-dev.c3.radix.equinor.com',
 	'https://api-prisma-decision-api-public-public.c3.radix.equinor.com',
+	'https://api-prisma-decision-ai-prod.c3.radix.equinor.com',
+	'https://api-prisma-decision-ai-test.c3.radix.equinor.com',
+	'https://api-prisma-decision-ai-dev.c3.radix.equinor.com',
 	'https://login.microsoftonline.com',
 	'http://localhost:7075/',
 ];
