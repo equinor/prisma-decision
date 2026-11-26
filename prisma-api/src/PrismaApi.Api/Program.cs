@@ -50,6 +50,8 @@ public class Program
                 .AddMicrosoftIdentityWebApi(builder.Configuration, "AzureAd")
                 .EnableTokenAcquisitionToCallDownstreamApi()
                 .AddDownstreamApi("FastApi", builder.Configuration.GetSection("FastApiService"))
+                .AddDownstreamApi(PrismaDecisionAiApiService.ServiceName,
+                    builder.Configuration.GetSection(PrismaDecisionAiApiService.ServiceName))
                 .AddMicrosoftGraph(builder.Configuration.GetSection("GraphApi"))
                 .AddInMemoryTokenCaches();
         }
@@ -165,6 +167,19 @@ public class Program
         builder.Services.AddScoped<IAssessmentService, AssessmentService>();
         builder.Services.AddScoped<IDecisionQualityAssessmentService, DecisionQualityAssessmentService>();
         builder.Services.AddHttpClient<IFastApiService, FastApiService>();
+        builder.Services.AddHttpClient<IGitHubApiService, GitHubApiService>();
+
+        if (isPublicInstance || isResearchInstance)
+        {
+            // No Entra token acquisition in these modes, so the AI API cannot be called.
+            builder.Services.AddScoped<IPrismaDecisionAiApiService>(_ =>
+                throw new InvalidOperationException(
+                    "The Prisma Decision AI API is not available in Public or Research mode."));
+        }
+        else
+        {
+            builder.Services.AddScoped<IPrismaDecisionAiApiService, PrismaDecisionAiApiService>();
+        }
 
         builder.Services.AddControllers()
             .AddJsonOptions(options =>
