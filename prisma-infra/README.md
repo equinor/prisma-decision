@@ -149,7 +149,9 @@ to verify that against the deployed resources; compiling Bicep alone does not es
 
 ## Client secret rotation
 
-The imported scripts rotate application client secrets in Azure and Key Vault, then restart Radix.
+The scripts rotate application client secrets in Azure and Key Vault, then restart Radix. Previous
+credentials are revoked only after you confirm the restarted API is healthy, because the API reads
+its client secret at startup.
 They are manual operations, not part of infrastructure deployment:
 
 ```console

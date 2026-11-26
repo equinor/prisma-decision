@@ -17,11 +17,13 @@ esac
 APP_VAULT_SECRET_MAPPINGS=(
   "dev|4251833c-b9c3-4013-afda-cbfd2cc50f3f|kvprismadecisiondevsw|prismadecisionapidevsec"
   "prod|3f7beff4-4f11-4a6b-8c41-1d076701bc00|kvprismadecisionprodsw|prismadecisionapiprodsec"
-  "test|e2f38655-db59-4ff3-b40a-c1221e06a49e|kvprismadecisiontestsw|prismadecisionapitestsec"
+  "test|e2f38655-db59-4ff3-b40a-c1221e06a49e|kvprismadecisiontestsw|prismadecisionapiptestsec"
 )
 DISPLAY_NAME="ClientSecret"
 SUBSCRIPTION_NAME="R107-prisma-decision" 
 RADIX_APP_NAME="prisma-decision-api"
+# Old credentials are revoked only after Radix restarts onto the new secrets.
+PENDING_REVOCATIONS=()
 
 
 echo "Starting secret rotation script"
@@ -85,8 +87,7 @@ if [[ "$(uname -s)" == "Darwin" ]]; then
 
   while IFS= read -r old_key_id; do
     if [[ -n "$old_key_id" ]]; then
-      az ad app credential delete --id "$app_id" --key-id "$old_key_id"
-      echo "Deleted previous '$DISPLAY_NAME' credential '$old_key_id' from app '$app_id'."
+      PENDING_REVOCATIONS+=("$app_id|$old_key_id")
     fi
   done <<< "$old_key_ids"
 
@@ -94,12 +95,6 @@ if [[ "$(uname -s)" == "Darwin" ]]; then
 done
 
 echo "Successfully rotated and deployed all configured app secrets."
-
-# Logout from Azure CLI after completing the secret rotation
-echo "Logging out from Azure CLI"
-
-az logout
-
 
 
 # Radix can now use the updated secret from Key Vault
@@ -120,3 +115,17 @@ echo "Logging out from Radix CLI"
 
 ## Logout from Radix CLI after restarting the environment
 rx logout
+
+# The API reads CLIENT_SECRET only at startup, so pods still on the old secret break once it is revoked.
+if [[ ${#PENDING_REVOCATIONS[@]} -gt 0 ]]; then
+  read -r -p "Confirm the restarted API is healthy in Radix, then press Enter to revoke the previous credentials (Ctrl+C keeps them): "
+  for revocation in "${PENDING_REVOCATIONS[@]}"; do
+    IFS='|' read -r app_id old_key_id <<< "$revocation"
+    az ad app credential delete --id "$app_id" --key-id "$old_key_id"
+    echo "Deleted previous '$DISPLAY_NAME' credential '$old_key_id' from app '$app_id'."
+  done
+fi
+
+# Logout from Azure CLI after completing the secret rotation
+echo "Logging out from Azure CLI"
+az logout

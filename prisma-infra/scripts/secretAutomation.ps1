@@ -14,7 +14,7 @@ $ErrorActionPreference = 'Stop'
 $ClientAPPToKeyVaultMappings = @(
     [pscustomobject]@{ Environment = 'dev'; AppId = '4251833c-b9c3-4013-afda-cbfd2cc50f3f'; VaultName = 'kvprismadecisiondevsw'; SecretName = 'prismadecisionapidevsec' }
     [pscustomobject]@{ Environment = 'prod'; AppId = '3f7beff4-4f11-4a6b-8c41-1d076701bc00'; VaultName = 'kvprismadecisionprodsw'; SecretName = 'prismadecisionapiprodsec' }
-    [pscustomobject]@{ Environment = 'test'; AppId = 'e2f38655-db59-4ff3-b40a-c1221e06a49e'; VaultName = 'kvprismadecisiontestsw'; SecretName = 'prismadecisionapitestsec' }
+    [pscustomobject]@{ Environment = 'test'; AppId = 'e2f38655-db59-4ff3-b40a-c1221e06a49e'; VaultName = 'kvprismadecisiontestsw'; SecretName = 'prismadecisionapiptestsec' }
 )
 
 if ($Environment -ne 'all') {
@@ -33,6 +33,8 @@ function Assert-LastCommandSucceeded {
     }
 }
 
+# Old credentials are revoked only after Radix restarts onto the new secrets.
+$PendingRevocations = [System.Collections.Generic.List[object]]::new()
 $AzureLoginSucceeded = $false
 try {
     Write-Host 'Logging into Azure CLI'
@@ -92,16 +94,53 @@ try {
 
         foreach ($OldKeyId in $OldKeyIds) {
             if (-not [string]::IsNullOrWhiteSpace([string]$OldKeyId)) {
-                az ad app credential delete `
-                    --id $Mapping.AppId `
-                    --key-id $OldKeyId `
-                    --output none
-                Assert-LastCommandSucceeded "Failed to delete previous credential $OldKeyId from app $($Mapping.AppId)."
-                Write-Host "Deleted previous $DisplayName credential $OldKeyId."
+                $PendingRevocations.Add([pscustomobject]@{ AppId = $Mapping.AppId; KeyId = [string]$OldKeyId })
             }
         }
 
         Write-Host "Updated secret '$($Mapping.SecretName)' in Key Vault '$($Mapping.VaultName)' for app '$($Mapping.AppId)'."
+    }
+
+    $RadixLoginSucceeded = $false
+    try {
+        Write-Host 'Logging into Radix CLI'
+        rx login
+        if ($LASTEXITCODE -ne 0) {
+            throw 'Radix login failed; previous app credentials were left intact.'
+        }
+        $RadixLoginSucceeded = $true
+
+        if ($Environment -eq 'all') {
+            rx restart application -a $RadixAppName
+        }
+        else {
+            rx restart environment -a $RadixAppName -e $Environment
+        }
+        if ($LASTEXITCODE -ne 0) {
+            throw 'Radix restart failed; previous app credentials were left intact.'
+        }
+    }
+    finally {
+        if ($RadixLoginSucceeded) {
+            Write-Host 'Logging out from Radix CLI'
+            rx logout
+            if ($LASTEXITCODE -ne 0) {
+                Write-Warning 'Radix logout failed.'
+            }
+        }
+    }
+
+    # The API reads CLIENT_SECRET only at startup, so pods still on the old secret break once it is revoked.
+    if ($PendingRevocations.Count -gt 0) {
+        Read-Host 'Confirm the restarted API is healthy in Radix, then press Enter to revoke the previous credentials (Ctrl+C keeps them)' | Out-Null
+        foreach ($Revocation in $PendingRevocations) {
+            az ad app credential delete `
+                --id $Revocation.AppId `
+                --key-id $Revocation.KeyId `
+                --output none
+            Assert-LastCommandSucceeded "Failed to delete previous credential $($Revocation.KeyId) from app $($Revocation.AppId)."
+            Write-Host "Deleted previous $DisplayName credential $($Revocation.KeyId) from app $($Revocation.AppId)."
+        }
     }
 }
 finally {
@@ -110,35 +149,6 @@ finally {
         az logout --output none
         if ($LASTEXITCODE -ne 0) {
             Write-Warning 'Azure CLI logout failed.'
-        }
-    }
-}
-
-$RadixLoginSucceeded = $false
-try {
-    Write-Host 'Logging into Radix CLI'
-    rx login
-    if ($LASTEXITCODE -ne 0) {
-        throw 'Radix login failed.'
-    }
-    $RadixLoginSucceeded = $true
-
-    if ($Environment -eq 'all') {
-        rx restart application -a $RadixAppName
-    }
-    else {
-        rx restart environment -a $RadixAppName -e $Environment
-    }
-    if ($LASTEXITCODE -ne 0) {
-        throw 'Radix restart failed.'
-    }
-}
-finally {
-    if ($RadixLoginSucceeded) {
-        Write-Host 'Logging out from Radix CLI'
-        rx logout
-        if ($LASTEXITCODE -ne 0) {
-            Write-Warning 'Radix logout failed.'
         }
     }
 }
