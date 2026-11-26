@@ -49,7 +49,7 @@ spec:
                         envVar: CLIENT_SECRET
                       - name: applicationinsightapiprod
                         envVar: APPLICATION_INSIGHTS_CONNECTION_STRING
-                      - name: InstallationId
+                      - name: GitHubInstallationId
                         envVar: GITHUB_INSTALLATION_ID
                       - name: GitHubAppId
                         envVar: APP_ID
@@ -71,7 +71,7 @@ spec:
                         envVar: CLIENT_SECRET
                       - name: applicationinsightapiptest
                         envVar: APPLICATION_INSIGHTS_CONNECTION_STRING
-                      - name: InstallationId
+                      - name: GitHubInstallationId
                         envVar: GITHUB_INSTALLATION_ID
                       - name: GitHubAppId
                         envVar: APP_ID
@@ -93,7 +93,7 @@ spec:
                         envVar: CLIENT_SECRET
                       - name: applicationinsightapidev
                         envVar: APPLICATION_INSIGHTS_CONNECTION_STRING
-                      - name: InstallationId
+                      - name: GitHubInstallationId
                         envVar: GITHUB_INSTALLATION_ID
                       - name: GitHubAppId
                         envVar: APP_ID
