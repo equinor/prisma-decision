@@ -49,6 +49,12 @@ spec:
                         envVar: CLIENT_SECRET
                       - name: applicationinsightapiprod
                         envVar: APPLICATION_INSIGHTS_CONNECTION_STRING
+                      - name: InstallationId
+                        envVar: GITHUB_INSTALLATION_ID
+                      - name: GitHubAppId
+                        envVar: APP_ID
+                      - name: GitHubPrivateKeyBase64
+                        envVar: GITHUB_PRIVATE_KEY_BASE64
           identity:
             azure:
                 clientId: 0301648e-27c7-4bdb-b366-0f9a206028c4
@@ -65,6 +71,12 @@ spec:
                         envVar: CLIENT_SECRET
                       - name: applicationinsightapiptest
                         envVar: APPLICATION_INSIGHTS_CONNECTION_STRING
+                      - name: InstallationId
+                        envVar: GITHUB_INSTALLATION_ID
+                      - name: GitHubAppId
+                        envVar: APP_ID
+                      - name: GitHubPrivateKeyBase64
+                        envVar: GITHUB_PRIVATE_KEY_BASE64
           identity:
             azure:
               clientId: f3df74ff-7a88-4f51-8ecd-1e3d8a580961
@@ -81,6 +93,12 @@ spec:
                         envVar: CLIENT_SECRET
                       - name: applicationinsightapidev
                         envVar: APPLICATION_INSIGHTS_CONNECTION_STRING
+                      - name: InstallationId
+                        envVar: GITHUB_INSTALLATION_ID
+                      - name: GitHubAppId
+                        envVar: APP_ID
+                      - name: GitHubPrivateKeyBase64
+                        envVar: GITHUB_PRIVATE_KEY_BASE64
           identity:
             azure:
               clientId: 0e69d773-2ad4-4918-a22c-e7df52e3ab7a

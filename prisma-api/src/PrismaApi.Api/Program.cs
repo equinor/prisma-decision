@@ -41,9 +41,15 @@ public class Program
         if (!isPublicInstance && !isResearchInstance)
         {
             var clientSecret = Environment.GetEnvironmentVariable("CLIENT_SECRET");
-            if (!string.IsNullOrEmpty(clientSecret))
+            var installationId = Environment.GetEnvironmentVariable("GITHUB_INSTALLATION_ID");
+            var appId = Environment.GetEnvironmentVariable("APP_ID");
+            var privateKeyBase64 = Environment.GetEnvironmentVariable("GITHUB_PRIVATE_KEY_BASE64");
+            if (!string.IsNullOrEmpty(clientSecret) && !string.IsNullOrEmpty(installationId) && !string.IsNullOrEmpty(appId) && !string.IsNullOrEmpty(privateKeyBase64))
             {
                 builder.Configuration["AzureAd:ClientSecret"] = clientSecret;
+                builder.Configuration["GitHub:InstallationId"] = installationId;
+                builder.Configuration["GitHub:AppId"] = appId;
+                builder.Configuration["GitHub:PrivateKeyBase64"] = privateKeyBase64;
             }
 
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

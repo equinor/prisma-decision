@@ -159,7 +159,8 @@ public class GitHubApiService : IGitHubApiService
     private string CreateAppJwt()
     {
         var appId = GetRequiredConfiguration("GitHubApi:AppId");
-        string privateKey = File.ReadAllText("/Users/RKAT/Desktop/Projects/PrismaDecision/prisma-decision/prisma-github-issue-creation.2026-11-23.private-key.pem");
+        string privateKeyBase64 = GetRequiredConfiguration("GitHubApi:PrivateKeyBase64");
+        var privateKey = Encoding.UTF8.GetString(Convert.FromBase64String(privateKeyBase64));
         var now = DateTimeOffset.UtcNow;
         var header = Base64UrlEncode(JsonSerializer.SerializeToUtf8Bytes(new { alg = "RS256", typ = "JWT" }));
         var payload = Base64UrlEncode(JsonSerializer.SerializeToUtf8Bytes(new
