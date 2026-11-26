@@ -5,7 +5,9 @@ on:
         paths:
             - "prisma-ui/**"
             - "prisma-api/**"
+            - "prisma-infra/**"
             - ".github/workflows/release-please.yml"
+            - ".github/workflows/infra-deploy.yml"
             - ".release-please-manifest.json"
             - "release-please-config.json"
             - "release-please-config.all.json"
@@ -18,7 +20,33 @@ permissions:
 name: release-please
 
 jobs:
+    detect-infra-release:
+        runs-on: ubuntu-latest
+        outputs:
+            infra-release: ${{ steps.detect.outputs.infra-release }}
+        steps:
+            - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+              with:
+                  fetch-depth: 0
+                  persist-credentials: false
+            - id: detect
+              run: bash prisma-infra/scripts/release-needed.sh
+
+    # GITHUB_TOKEN-created tags cannot trigger another Actions workflow.
+    # Deploy first so combined releases cannot start the API before its infrastructure.
+    deploy-infra-prod:
+        needs: detect-infra-release
+        if: needs.detect-infra-release.outputs.infra-release == 'true'
+        uses: ./.github/workflows/infra-deploy.yml
+        with:
+            env-name: prod
+            github-environment: Production
+
     release-please:
+        needs: [detect-infra-release, deploy-infra-prod]
+        if: >-
+            ${{ !cancelled() && needs.detect-infra-release.result == 'success' &&
+                (needs.deploy-infra-prod.result == 'success' || needs.deploy-infra-prod.result == 'skipped') }}
         runs-on: ubuntu-latest
         outputs:
             api-release-created: ${{ steps.release.outputs['prisma-api--release_created'] }}
@@ -66,7 +94,7 @@ jobs:
 
     migrate-api-prod:
         needs: release-please
-        if: needs.release-please.outputs.api-release-created == 'true'
+        if: ${{ !cancelled() && needs.release-please.result == 'success' && needs.release-please.outputs.api-release-created == 'true' }}
         uses: ./.github/workflows/api-ef-migrations.yml
         with:
             env-name: Production

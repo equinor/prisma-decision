@@ -68,19 +68,19 @@ dir = "{{config_root}}/prisma-api/src"
 run = "./scripts/Remove-Last-Migration.sh"
 
 [tasks."release:test"]
-description = "Deploy the current commit to the test environment by moving the TEST tag"
+description = "Deploy the current commit to test: infrastructure, then the TEST tag, then migrations"
 run = [
-  "git fetch origin --tags --force",
-  "git tag -f TEST",
-  "git push -f origin refs/tags/TEST",
+  'gh api "repos/{owner}/{repo}/commits/$(git rev-parse HEAD)" --silent || { echo "Push the current commit to GitHub first" >&2; exit 1; }',
+  'gh workflow run release-environment.yml -f environment=test -f sha="$(git rev-parse HEAD)"',
+  "echo 'Started. Follow progress with: gh run list --workflow release-environment.yml'",
 ]
 
 [tasks."release:public"]
-description = "Deploy the current commit to the public environment by moving the PUBLIC tag"
+description = "Deploy the current commit to public: infrastructure, then the PUBLIC tag, then migrations"
 run = [
-  "git fetch origin --tags --force",
-  "git tag -f PUBLIC",
-  "git push -f origin refs/tags/PUBLIC",
+  'gh api "repos/{owner}/{repo}/commits/$(git rev-parse HEAD)" --silent || { echo "Push the current commit to GitHub first" >&2; exit 1; }',
+  'gh workflow run release-environment.yml -f environment=public -f sha="$(git rev-parse HEAD)"',
+  "echo 'Started. Follow progress with: gh run list --workflow release-environment.yml'",
 ]
 
 [tasks."release:design"]
@@ -104,6 +104,13 @@ description = "Build the API and UI"
 run = [
   "dotnet build prisma-api/src/PrismaApi.sln --configuration Release",
   "npm --prefix prisma-ui run build",
+]
+
+[tasks."infra:check"]
+description = "Compile Bicep and check infrastructure release detection"
+run = [
+  "az bicep build --file prisma-infra/bicep/main.bicep --stdout > /dev/null",
+  "node --test prisma-infra/scripts/release-needed.test.mjs",
 ]
 
 [tasks.check]

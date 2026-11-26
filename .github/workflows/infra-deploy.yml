@@ -1,0 +1,50 @@
+name: Infra deploy (reusable)
+
+on:
+    workflow_call:
+        inputs:
+            env-name:
+                required: true
+                type: string
+            github-environment:
+                required: true
+                type: string
+            ref:
+                description: Commit to deploy; defaults to the triggering commit
+                required: false
+                type: string
+                default: ""
+
+permissions: {}
+
+jobs:
+    deploy:
+        name: Deploy ${{ inputs.env-name }}
+        runs-on: ubuntu-latest
+        concurrency: infra-deploy-${{ inputs.env-name }}
+        permissions:
+            id-token: write
+            contents: read
+        environment: ${{ inputs.github-environment }}
+        steps:
+            - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+              with:
+                  ref: ${{ inputs.ref }}
+                  persist-credentials: false
+            - name: Log in to Azure using OIDC
+              uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5 # v2.3.0
+              with:
+                  client-id: ${{ vars.AZURE_CLIENT_ID }}
+                  tenant-id: ${{ vars.AZURE_TENANT_ID }}
+                  subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+            - name: Deploy infrastructure
+              uses: azure/bicep-deploy@c66bb161da87636b24a64aa8e0a427645d846c57 # v2
+              with:
+                  type: deployment
+                  operation: create
+                  name: ${{ inputs.env-name }}
+                  scope: subscription
+                  location: swedencentral
+                  subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+                  template-file: ./prisma-infra/bicep/main.bicep
+                  parameters-file: ./prisma-infra/bicep/main.parameter.${{ inputs.env-name }}.json
