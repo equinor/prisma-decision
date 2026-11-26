@@ -31,6 +31,20 @@ jobs:
               with:
                   ref: ${{ inputs.ref }}
                   persist-credentials: false
+            # Rerunning an older failed main-branch run would reapply superseded templates.
+            # Test and public pass an explicit ref because they deploy the chosen commit.
+            - name: Reject superseded templates
+              if: inputs.ref == '' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  BRANCH: ${{ github.event.repository.default_branch }}
+              run: |
+                  changed=$(gh api "repos/$GITHUB_REPOSITORY/compare/$GITHUB_SHA...$BRANCH" \
+                      --jq '[.files[]?.filename | select(startswith("prisma-infra/bicep/"))] | length')
+                  if [ "$changed" -ne 0 ]; then
+                      echo "::error::$BRANCH has newer infrastructure templates; its own run deploys them."
+                      exit 1
+                  fi
             - name: Log in to Azure using OIDC
               uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5 # v2.3.0
               with:
