@@ -116,13 +116,7 @@ az deployment sub what-if \
   --parameters prisma-infra/bicep/main.parameter.dev.json
 ```
 
-Deploy manually with PowerShell:
-
-```powershell
-./prisma-infra/bicep/deployMain.ps1 -envName dev
-```
-
-Or with Azure CLI:
+Deploy manually:
 
 ```bash
 az deployment sub create \
