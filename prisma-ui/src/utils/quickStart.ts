@@ -45,17 +45,35 @@ export const quickStartResponseSchema = z.object({
 				note,
 			}),
 			z.object({
-				kind: z.literal('probability_table'),
+				kind: z.literal('tables'),
 				path,
 				item: z.object({
-					name: z.string(),
-					rows: diagramInformationSchema.shape.discrete_probabilities,
+					probabilities: z.array(
+						z.object({
+							name: z.string(),
+							rows: diagramInformationSchema.shape.discrete_probabilities,
+						}),
+					),
+					utilities: z.array(
+						z.object({
+							name: z.string(),
+							rows: diagramInformationSchema.shape.discrete_utilities,
+						}),
+					),
 				}),
 				note,
 			}),
 		])
 		.nullable(),
-	shortcuts: z.array(z.object({ label: z.string().min(1), message: z.string().min(1) })),
+	shortcuts: z.array(
+		z.object({
+			label: z.string().min(1),
+			message: z.string().min(1),
+			extras: z
+				.array(z.object({ label: z.string().min(1), message: z.string().min(1) }))
+				.default([]),
+		}),
+	),
 	progress: z.object({
 		project_information: z.boolean(),
 		objectives: z.number().int(),

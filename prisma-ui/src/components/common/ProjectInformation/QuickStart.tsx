@@ -1,7 +1,8 @@
 import { Button, CircularProgress, Dialog, Icon } from '@equinor/eds-core-react';
+import { Checkbox } from '@equinor/eds-core-react/next';
 import { close, send } from '@equinor/eds-icons';
 import { format, parseISO } from 'date-fns';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
 import { useCreateQuickStartProject } from '../../../hooks/api/useCreateQuickStartProject';
 import { useGetOpeningQuestion } from '../../../hooks/api/useGetOpeningQuestion';
 import { useSendQuickStartMessage } from '../../../hooks/api/useQuickStart';
@@ -18,6 +19,10 @@ import { ChatItemReview, ReviewField } from '../../ChatItemReview';
 import { QuickStartPanel } from './QuickStartPanel';
 
 type Message = { id: number; role: 'user' | 'assistant'; text: string };
+
+const DEFAULT_CHAT_WIDTH = 640;
+const MIN_PANE_WIDTH = 360;
+const RESIZE_STEP = 40;
 
 const reviewHint =
 	'If something is wrong, describe the corrections in the chat and I will fix it. Nothing is created until you click Create project at the end.';
@@ -63,6 +68,8 @@ const QuickStartWindow = ({ onClose }: { onClose: () => void }) => {
 	const busyRef = useRef(false);
 	const inputRef = useRef<HTMLTextAreaElement>(null);
 	const bottomRef = useRef<HTMLDivElement>(null);
+	const layoutRef = useRef<HTMLDivElement>(null);
+	const [chatWidth, setChatWidth] = useState(DEFAULT_CHAT_WIDTH);
 	const isBusy = isSending || isCreating;
 	const chatDisabled = isBusy || !openingQuestion;
 	const hasUnsentInput = !!input.trim();
@@ -150,6 +157,19 @@ const QuickStartWindow = ({ onClose }: { onClose: () => void }) => {
 
 	const hasPanel = !!response;
 
+	const resizeChat = (width: number) => {
+		const layoutWidth = layoutRef.current?.clientWidth ?? window.innerWidth;
+		setChatWidth(Math.max(MIN_PANE_WIDTH, Math.min(width, layoutWidth - MIN_PANE_WIDTH)));
+	};
+	const dragChatEdge = (event: PointerEvent<HTMLDivElement>) => {
+		if (!event.currentTarget.hasPointerCapture(event.pointerId)) return;
+		resizeChat(event.clientX - (layoutRef.current?.getBoundingClientRect().left ?? 0));
+	};
+	const moveChatEdge = (event: KeyboardEvent<HTMLDivElement>) => {
+		if (event.key === 'ArrowLeft') resizeChat(chatWidth - RESIZE_STEP);
+		if (event.key === 'ArrowRight') resizeChat(chatWidth + RESIZE_STEP);
+	};
+
 	return (
 		<Dialog
 			open
@@ -179,9 +199,10 @@ const QuickStartWindow = ({ onClose }: { onClose: () => void }) => {
 				</Button>
 			</header>
 
-			<div className='flex min-h-0 flex-1'>
+			<div ref={layoutRef} className='flex min-h-0 flex-1'>
 				<div
-					className={`flex min-h-0 flex-col ${hasPanel ? 'w-110 shrink-0 border-r border-(color:--eds-border-non-interactive-neutral-muted)' : 'flex-1'}`}
+					className={`flex min-h-0 flex-col ${hasPanel ? 'shrink-0' : 'flex-1'}`}
+					style={hasPanel ? { width: chatWidth } : undefined}
 				>
 					<div className='flex-1 overflow-y-auto px-6 py-6'>
 						<div className='mx-auto flex w-full max-w-3xl flex-col gap-4'>
@@ -249,15 +270,12 @@ const QuickStartWindow = ({ onClose }: { onClose: () => void }) => {
 							{!response?.pending &&
 								!isSending &&
 								response?.shortcuts.map(shortcut => (
-									<Button
+									<ShortcutChoice
 										key={shortcut.label}
-										className='self-start'
-										variant='outlined'
-										onClick={() => sendMessage(shortcut.message)}
+										shortcut={shortcut}
 										disabled={isBusy || hasUnsentInput}
-									>
-										{shortcut.label}
-									</Button>
+										onSend={sendMessage}
+									/>
 								))}
 							{resultInvalid && (
 								<p role='alert' className='text-sm'>
@@ -311,16 +329,81 @@ const QuickStartWindow = ({ onClose }: { onClose: () => void }) => {
 					</form>
 				</div>
 				{hasPanel && (
-					<QuickStartPanel
-						response={response}
-						canCreate={!!records}
-						isCreating={isCreating}
-						creationError={creationError}
-						onCreate={() => records && createProject(records)}
-					/>
+					<>
+						<div
+							role='separator'
+							aria-orientation='vertical'
+							aria-label='Resize chat'
+							aria-valuenow={chatWidth}
+							tabIndex={0}
+							onPointerDown={event =>
+								event.currentTarget.setPointerCapture(event.pointerId)
+							}
+							onPointerMove={dragChatEdge}
+							onKeyDown={moveChatEdge}
+							className='w-1 shrink-0 cursor-col-resize touch-none bg-(--eds-border-non-interactive-neutral-muted) hover:bg-(--eds-border-non-interactive-neutral-emphasis) focus-visible:bg-(--eds-border-non-interactive-accent-emphasis)'
+						/>
+						<QuickStartPanel
+							response={response}
+							canCreate={!!records}
+							isCreating={isCreating}
+							creationError={creationError}
+							onCreate={() => records && createProject(records)}
+						/>
+					</>
 				)}
 			</div>
 		</Dialog>
+	);
+};
+
+export const ShortcutChoice = ({
+	shortcut,
+	disabled,
+	onSend,
+}: {
+	shortcut: QuickStartResponse['shortcuts'][number];
+	disabled: boolean;
+	onSend: (message: string) => void;
+}) => {
+	const [chosen, setChosen] = useState<string[]>([]);
+	const toggle = (label: string) =>
+		setChosen(prev =>
+			prev.includes(label) ? prev.filter(item => item !== label) : [...prev, label],
+		);
+	return (
+		<div className='flex flex-col items-start gap-1'>
+			{shortcut.extras.length > 0 && (
+				<div role='group' aria-label='Also propose' className='flex flex-wrap gap-x-4'>
+					<span className='self-center text-sm'>Also propose:</span>
+					{shortcut.extras.map(extra => (
+						<Checkbox
+							key={extra.label}
+							label={extra.label}
+							checked={chosen.includes(extra.label)}
+							onChange={() => toggle(extra.label)}
+							disabled={disabled}
+						/>
+					))}
+				</div>
+			)}
+			<Button
+				variant={shortcut.extras.length ? 'contained' : 'outlined'}
+				onClick={() =>
+					onSend(
+						[
+							shortcut.message,
+							...shortcut.extras
+								.filter(extra => chosen.includes(extra.label))
+								.map(extra => extra.message),
+						].join(' '),
+					)
+				}
+				disabled={disabled}
+			>
+				{shortcut.label}
+			</Button>
+		</div>
 	);
 };
 
@@ -335,7 +418,7 @@ const PendingReview = ({
 	hasUnsentInput: boolean;
 	onApprove: () => void;
 }) => {
-	if (review.kind !== 'project' && review.kind !== 'probability_table')
+	if (review.kind !== 'project' && review.kind !== 'tables')
 		return (
 			<ChatItemReview
 				review={review}
@@ -349,7 +432,7 @@ const PendingReview = ({
 		);
 	return (
 		<section
-			aria-label={review.kind === 'project' ? 'Review project' : 'Review probabilities'}
+			aria-label={review.kind === 'project' ? 'Review project' : 'Review proposed tables'}
 			className='border-background-medium flex flex-col gap-3 rounded border p-3 text-sm'
 		>
 			{review.kind === 'project' ? (
@@ -374,8 +457,19 @@ const PendingReview = ({
 				</>
 			) : (
 				<>
-					<h3 className='font-medium'>Review the probabilities for {review.item.name}</h3>
-					<ProbabilityTable rows={review.item.rows} />
+					<h3 className='font-medium'>Review the proposed tables</h3>
+					{review.item.probabilities.map(table => (
+						<div key={`p-${table.name}`} className='flex flex-col gap-1'>
+							<h4 className='font-medium'>Probabilities for {table.name}</h4>
+							<ProbabilityTable rows={table.rows} />
+						</div>
+					))}
+					{review.item.utilities.map(table => (
+						<div key={`u-${table.name}`} className='flex flex-col gap-1'>
+							<h4 className='font-medium'>Utility values for {table.name}</h4>
+							<UtilityTable rows={table.rows} />
+						</div>
+					))}
 				</>
 			)}
 			{review.note && <p className='whitespace-pre-wrap'>{review.note}</p>}
@@ -388,13 +482,37 @@ const PendingReview = ({
 	);
 };
 
+const when = (row: { parent_states: { issue_name: string; state_name: string }[] }) =>
+	row.parent_states.map(s => `${s.issue_name} = ${s.state_name}`).join(', ');
+
+const UtilityTable = ({
+	rows,
+}: {
+	rows: Extract<QuickStartReview, { kind: 'tables' }>['item']['utilities'][number]['rows'];
+}) => (
+	<table className='text-left'>
+		<thead>
+			<tr>
+				<th>When</th>
+				<th>Utility value</th>
+			</tr>
+		</thead>
+		<tbody>
+			{rows.map(row => (
+				<tr key={when(row)}>
+					<td>{when(row) || 'Always'}</td>
+					<td>{row.utility_value}</td>
+				</tr>
+			))}
+		</tbody>
+	</table>
+);
+
 const ProbabilityTable = ({
 	rows,
 }: {
-	rows: Extract<QuickStartReview, { kind: 'probability_table' }>['item']['rows'];
+	rows: Extract<QuickStartReview, { kind: 'tables' }>['item']['probabilities'][number]['rows'];
 }) => {
-	const when = (row: (typeof rows)[number]) =>
-		row.parent_states.map(s => `${s.issue_name} = ${s.state_name}`).join(', ');
 	const outcomes = [...new Set(rows.map(row => row.outcome_name))];
 	const combinations = [...new Set(rows.map(when))];
 	return (

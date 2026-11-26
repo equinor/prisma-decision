@@ -120,7 +120,7 @@ export const QuickStartPanel = ({
 		response.pending?.kind === 'influence_diagram' ? response.pending.item : undefined;
 	const diagramIssues = approvedIssues.filter(isDiagramIssue);
 	return (
-		<div className='flex flex-1 flex-col gap-6 overflow-y-auto p-6'>
+		<div className='flex min-w-0 flex-1 flex-col gap-6 overflow-y-auto p-6'>
 			<div className='flex items-start justify-between gap-4'>
 				<div>
 					<h2 className='text-xl font-medium'>Project setup</h2>
