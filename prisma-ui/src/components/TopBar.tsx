@@ -1,10 +1,12 @@
 import { Button, TopBar as EdsTopBar, Icon, StarProgress } from '@equinor/eds-core-react';
 import { sun } from '@equinor/eds-icons';
 import { useIsFetching, useIsMutating } from '@tanstack/react-query';
-import { useNavigate, useParams } from 'react-router';
+import { useLocation, useNavigate, useParams } from 'react-router';
 import { useGetProjects } from '../hooks/api/useGetProjects';
+import { useGetSignUser } from '../hooks/api/useGetSignUser';
 import useDarkMode from '../hooks/useDarkMode';
 import { MoonIcon } from './common/MoonIcon';
+import { CreateGitHubIssueDialog } from './common/CreateGitHubIssueDialog';
 
 export const TopBar = () => {
 	const { toggleDarkMode, darkMode } = useDarkMode();
@@ -15,6 +17,8 @@ export const TopBar = () => {
 	const { projectId } = useParams<{ projectId: string }>();
 	const { projects } = useGetProjects();
 	const selectedProject = projects.find(project => project.id === projectId);
+	const { signuser } = useGetSignUser();
+	const { pathname } = useLocation();
 
 	return (
 		<EdsTopBar sticky={false} className='col-span-2 border-b-0! pl-3.5!'>
@@ -39,6 +43,13 @@ export const TopBar = () => {
 				)}
 			</EdsTopBar.Header>
 			<EdsTopBar.Actions className='flex items-center gap-4'>
+				<CreateGitHubIssueDialog
+					context={{
+						project: selectedProject?.name ?? 'No project selected',
+						pageUrl: `${window.location.origin}${pathname}`,
+						from: signuser?.name ?? 'Unavailable',
+					}}
+				/>
 				<Button
 					variant='ghost_icon'
 					onClick={toggleDarkMode}

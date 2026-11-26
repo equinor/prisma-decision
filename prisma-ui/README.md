@@ -12,6 +12,7 @@ A decision quality assessment tool for Equinor that helps teams structure and ev
 - **Project Import/Export and Duplication** — Import and export project data,also duplicates the project;
 - **Issue view** — Reorder issues with dnd-kit.
 - **Authentication** — Azure AD (MSAL) integration for Equinor SSO
+- **GitHub issue submission** — The top-bar dialog submits bugs, improvements, and suggestions with structured Markdown through `POST /github/issues`.
 
 ## Related
 
@@ -89,6 +90,21 @@ counterparts. Reusable issue defaults are
 in `src/utils/createIssueDraft.ts`; shared issue, option, and outcome validation is
 in `src/validators.ts`. Validation rejects blank required text without trimming
 submitted values.
+
+## GitHub issue submission
+
+Use **Send feedback** in the top bar. Feedback is required; Bug, Suggestion, and
+Other are optional, deselectable type chips. The dialog shows the page, project,
+URL (without query parameters or fragments), and the available user's display name
+before submission, along with a warning that GitHub issues are public.
+
+**Send** closes the dialog after success. **Send and add another** clears the feedback,
+retains the type, and shows a dismissible success banner. Errors preserve the draft.
+The form uses EDS Dialog, Banner, TextArea, and Button. Feedback accepts Markdown;
+file uploads and a rich-text preview are not provided.
+
+The API derives the issue title from the feedback. Exact feedback matches among
+open issues receive the `duplicate` label; they are still created and left open.
 
 ## Project Structure
 
