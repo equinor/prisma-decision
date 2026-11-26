@@ -146,21 +146,3 @@ managed identity resources.
 
 No Azure resources should change merely because the templates moved. Azure access is required
 to verify that against the deployed resources; compiling Bicep alone does not establish parity.
-
-## Client secret rotation
-
-The scripts rotate application client secrets in Azure and Key Vault, then restart Radix. Previous
-credentials are revoked only after you confirm the restarted API is healthy, because the API reads
-its client secret at startup.
-They are manual operations, not part of infrastructure deployment:
-
-```console
-bash prisma-infra/scripts/secretAutomation.sh --env dev
-```
-
-```powershell
-./prisma-infra/scripts/secretAutomation.ps1 --env dev
-```
-
-Both accept `dev`, `test`, `prod` or `all` and require Azure CLI, Radix CLI, access to the
-configured app registrations and Key Vaults, and network access to the vaults.
