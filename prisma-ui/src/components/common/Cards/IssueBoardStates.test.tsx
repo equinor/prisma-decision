@@ -135,10 +135,10 @@ test.each(['Decision', 'Uncertainty'] as const)(
 		const dialog = screen.getByRole('dialog', { name: 'Edit Issue' });
 		expect(
 			within(dialog).getByRole('textbox', {
-				name: type === 'Decision' ? 'Option 1' : 'Outcome 1 Name',
+				name: type === 'Decision' ? 'Option 1 name' : 'Outcome 1 name',
 			}),
 		).toHaveValue(' First state ');
-		await user.click(within(dialog).getByRole('button', { name: 'Cancel' }));
+		await user.click(within(dialog).getByRole('button', { name: 'Close' }));
 		expect(requests).toHaveLength(1);
 	},
 );
@@ -360,13 +360,13 @@ test.each(['Decision', 'Uncertainty'] as const)(
 		const dialog = screen.getByRole('dialog', { name: 'Edit Issue' });
 		expect(
 			within(dialog).queryByRole('textbox', {
-				name: type === 'Decision' ? 'Option 1' : 'Outcome 1 Name',
+				name: type === 'Decision' ? 'Option 1 name' : 'Outcome 1 name',
 			}),
 		).toBeNull();
 		expect(within(dialog).getByRole('textbox', { name: 'Issue name' })).toHaveValue(
 			original.name,
 		);
-		await user.click(within(dialog).getByRole('button', { name: 'Cancel' }));
+		await user.click(within(dialog).getByRole('button', { name: 'Close' }));
 		await user.click(screen.getByRole('button', { name: `Add ${stateType}` }));
 		expect(screen.getByRole('textbox', { name: 'Name' })).toHaveFocus();
 		await user.type(screen.getByRole('textbox', { name: 'Name' }), 'Replacement{Enter}');
@@ -567,10 +567,10 @@ test.each(['Decision', 'Uncertainty'] as const)(
 		);
 		expect(
 			within(dialog).getByRole('textbox', {
-				name: type === 'Decision' ? 'Option 1' : 'Outcome 1 Name',
+				name: type === 'Decision' ? 'Option 1 name' : 'Outcome 1 name',
 			}),
 		).toHaveValue(type === 'Decision' ? 'Existing option' : 'Existing outcome');
-		await user.click(within(dialog).getByRole('button', { name: 'Cancel' }));
+		await user.click(within(dialog).getByRole('button', { name: 'Close' }));
 		expect(requests).toHaveLength(0);
 	},
 );

@@ -666,6 +666,6 @@ test.each(views)('%s retains full Edit access beside inline fields', async view 
 	expect(within(dialog).getByRole('textbox', { name: 'Description' })).toHaveValue(
 		existingIssue().description,
 	);
-	await user.click(screen.getByRole('button', { name: 'Cancel' }));
+	await user.click(screen.getByRole('button', { name: 'Close' }));
 	expect(apiClient.put).not.toHaveBeenCalled();
 });
