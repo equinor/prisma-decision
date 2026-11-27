@@ -5,6 +5,7 @@ import { useNavigate, useParams } from 'react-router';
 import { useGetProjects } from '../hooks/api/useGetProjects';
 import useDarkMode from '../hooks/useDarkMode';
 import { MoonIcon } from './common/MoonIcon';
+import { StepNavigation } from './StepNavigation';
 
 export const TopBar = () => {
 	const { toggleDarkMode, darkMode } = useDarkMode();
@@ -30,6 +31,7 @@ export const TopBar = () => {
 					<>
 						<div className='bg-background-medium m-0! h-8 w-0.5' />
 						{selectedProject.name}
+						<StepNavigation projectId={selectedProject.id} />
 					</>
 				)}
 				{isLoading && (
