@@ -1,5 +1,54 @@
 # Changelog
 
+## [1.2.0](https://github.com/equinor/prisma-decision/compare/prisma-ui-v1.1.0...prisma-ui-v1.2.0) (2026-11-27)
+
+
+### Features
+
+* **issues:** edit issues in a side sheet ([586ceae](https://github.com/equinor/prisma-decision/commit/586ceaee647efe19cad6ee9da8caa3be45b6fdf2))
+* **issues:** edit issues in a side sheet ([a3fa05f](https://github.com/equinor/prisma-decision/commit/a3fa05f34779edd4d0c663bc54a8aaf72eee7755))
+* **issues:** show decisions as a hierarchy of swimlanes ([d822b36](https://github.com/equinor/prisma-decision/commit/d822b36eb7da5bcfa06a2509144431bdb96b7445))
+* **issues:** show decisions as a hierarchy of swimlanes ([334f995](https://github.com/equinor/prisma-decision/commit/334f995971e0c3982f40d6ed40680abdacce3567))
+* **ui:** move step navigation into the top bar ([a3778e9](https://github.com/equinor/prisma-decision/commit/a3778e99265abbedf6f1e3d6a9a59d54c32059e4))
+* **ui:** move step navigation into the top bar ([4ecf136](https://github.com/equinor/prisma-decision/commit/4ecf1367cec0bf9bb02f4a7e41703b3705ea4ea8))
+
+
+### Bug Fixes
+
+* **issues:** reserve horizontal scrollbar space in decision lanes ([9bd9d15](https://github.com/equinor/prisma-decision/commit/9bd9d158617b59e5c7e55f6ef16ab1d168b7054f))
+* **whiteboard:** migrate legacy freehand outlines once ([1e5dfb2](https://github.com/equinor/prisma-decision/commit/1e5dfb2d738ca1d2c734ba2bb6d941c7b765c534))
+* **whiteboard:** render clean dashed and dotted freehand strokes ([ee91f74](https://github.com/equinor/prisma-decision/commit/ee91f7452a29339b6e5fbd487d025753587fbc21))
+* **whiteboard:** render freehand styles along a single centerline ([fda14f8](https://github.com/equinor/prisma-decision/commit/fda14f87dab1acf4d19b410b9595b354af7e3ecb))
+
+
+### Code Refactoring
+
+* **influence-diagram:** compose tables from ConditionalTable ([23e58af](https://github.com/equinor/prisma-decision/commit/23e58af4da1cf016c39a595a931613cff34bfdef))
+* **influence-diagram:** compose tables from ConditionalTable ([3a7d1ce](https://github.com/equinor/prisma-decision/commit/3a7d1ced650d9c9c8d3512b1bc0a13b7f80369b9))
+
+
+### Documentation
+
+* **agents:** add UI agent guide and move API conventions ([edbc5e9](https://github.com/equinor/prisma-decision/commit/edbc5e946db6e8bcf3ea942fe07a2186911f20f8))
+
+
+### Tests
+
+* **diagram:** remove diagram tests for unbuilt behaviour ([e4f027c](https://github.com/equinor/prisma-decision/commit/e4f027c22bd7f27c372dbfac55c699850b060b91))
+* **issues:** remove Board state tests for unbuilt behaviour ([bcc1467](https://github.com/equinor/prisma-decision/commit/bcc1467ef04256c40451d6a337a544513bce7c7b))
+
+
+### Continuous Integration
+
+* deploy test from a shared TEST tag like PUBLIC and DESIGN ([1b3b774](https://github.com/equinor/prisma-decision/commit/1b3b774c37ca4e3b74c7e15baf4f2f1251abc3d9))
+* run UI tests on every PR and fix the broken ones ([632087b](https://github.com/equinor/prisma-decision/commit/632087bbc39703349b0bc7542e87d2c01fdd731d))
+* **ui:** run the UI tests on every PR ([9080c94](https://github.com/equinor/prisma-decision/commit/9080c94d91b21ec4b1b853d44a5146e1db60ddef))
+
+
+### Miscellaneous Chores
+
+* add release:ai task to move the AI tag ([b88557f](https://github.com/equinor/prisma-decision/commit/b88557faf07c8377b2a2cf852f9a6b6e806f55b0))
+
 ## [1.1.0](https://github.com/equinor/prisma-decision-web/compare/v1.0.0...v1.1.0) (2026-09-03)
 
 
