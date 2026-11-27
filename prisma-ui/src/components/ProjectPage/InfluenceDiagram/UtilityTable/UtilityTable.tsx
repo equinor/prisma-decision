@@ -1,7 +1,7 @@
 import { Button, Icon } from '@equinor/eds-core-react';
 import { close } from '@equinor/eds-icons';
-import { useUpdateDiscreteUtilities } from '../../../../hooks/api/useUpdateDiscreteUtilities';
-import { Issue } from '../../../../validators';
+import { useBulkUpdateDiscreteUtilities } from '../../../../hooks/api/useUpdateDiscreteUtilities';
+import { DiscreteUtility, Issue } from '../../../../validators';
 import { CardContainer } from '../../../common/Cards/CardContainer';
 import { ConditionalTable } from '../ConditionalTable/ConditionalTable';
 import { ResetUtilitiesButton } from './ResetUtilitiesButton';
@@ -27,8 +27,24 @@ export const UtilityTable = ({ issue, selected, onClose }: UtilityTableProps) =>
 );
 
 export const UtilityConditionalTable = ({ issue }: { issue: Issue }) => {
-	const { parents, rows, lookups } = useUtilityTable(issue);
-	const { mutate: updateUtility } = useUpdateDiscreteUtilities();
+	const { mutate: updateUtilities } = useBulkUpdateDiscreteUtilities();
+	return <UtilityTableContent issue={issue} onCommit={utility => updateUtilities([utility])} />;
+};
+
+/**
+ * The editable Utility table body. Shows the cached cells unless `utilities` is given, and reports
+ * each edited cell through `onCommit`.
+ */
+export const UtilityTableContent = ({
+	issue,
+	utilities,
+	onCommit,
+}: {
+	issue: Issue;
+	utilities?: DiscreteUtility[];
+	onCommit: (utility: DiscreteUtility) => void;
+}) => {
+	const { parents, rows, lookups } = useUtilityTable(issue, utilities);
 	return (
 		<ConditionalTable parents={parents} rows={rows} lookups={lookups}>
 			<ConditionalTable.Head>
@@ -42,9 +58,7 @@ export const UtilityConditionalTable = ({ issue }: { issue: Issue }) => {
 								key={utility.id + utility.utility_value}
 								id={utility.id}
 								value={utility.utility_value}
-								onCommit={utility_value =>
-									updateUtility({ ...utility, utility_value })
-								}
+								onCommit={utility_value => onCommit({ ...utility, utility_value })}
 							/>
 						))}
 					</ConditionalTable.Row>

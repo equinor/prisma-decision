@@ -8,7 +8,8 @@ import { Toaster, toast } from 'sonner';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { apiClient } from '../../api';
 import { existingIssue, project } from '../../test/issueFixtures';
-import { Issue } from '../../validators';
+import { getDeterministicProbabilityId } from '../../utils/tableShapes/deterministicIds';
+import { DiscreteProbability, Issue } from '../../validators';
 import { ProjectContext } from '../ProjectPage/ProjectContext';
 import { IssueRow } from '../ProjectPage/ProjectIssues/ListView/IssueRow';
 import { IssueCard, IssueCardEditMenuItem, IssueCardMenu } from './Cards/IssueCard';
@@ -40,11 +41,19 @@ const ProjectIssueEditor = ({
 
 let savedIssues: Issue[];
 let savedRequests: { method: string; url: string | undefined }[];
+let requestBodies: { url: string | undefined; data: unknown }[];
+let failingUrls: Set<string>;
+let heldIssueUpdate: Promise<void> | undefined;
 
 const adapter: AxiosAdapter = async config => {
+	if (config.method === 'put' && config.url === '/issues') await heldIssueUpdate;
+	if (config.url && failingUrls.has(config.url)) {
+		throw Object.assign(new Error('Request failed'), { config, isAxiosError: true });
+	}
 	if (config.method === 'post' || config.method === 'put') {
-		savedIssues.push(...JSON.parse(config.data));
+		if (config.url === '/issues') savedIssues.push(...JSON.parse(config.data));
 		savedRequests.push({ method: config.method, url: config.url });
+		requestBodies.push({ url: config.url, data: JSON.parse(config.data) });
 	}
 	if (config.method === 'delete') {
 		savedRequests.push({ method: config.method, url: config.url });
@@ -61,7 +70,11 @@ const adapter: AxiosAdapter = async config => {
 	};
 };
 
-const renderForm = (children: ReactNode, issues: Issue[] = []) => {
+const renderForm = (
+	children: ReactNode,
+	issues: Issue[] = [],
+	probabilities: DiscreteProbability[] = [],
+) => {
 	const queryClient = new QueryClient({
 		defaultOptions: {
 			queries: { retry: false, staleTime: Infinity },
@@ -72,18 +85,42 @@ const renderForm = (children: ReactNode, issues: Issue[] = []) => {
 	for (const key of ['edges', 'nodes', 'probabilityTables', 'restrictionTables']) {
 		queryClient.setQueryData([key], []);
 	}
-	return render(
-		<QueryClientProvider client={queryClient}>
-			<Provider>
-				<ProjectContext value={project}>{children}</ProjectContext>
-			</Provider>
-		</QueryClientProvider>,
-	);
+	queryClient.setQueryData(['probabilityTables'], probabilities);
+	queryClient.setQueryData(['utilityTables'], []);
+	return {
+		queryClient,
+		...render(
+			<QueryClientProvider client={queryClient}>
+				<Provider>
+					<ProjectContext value={project}>{children}</ProjectContext>
+				</Provider>
+			</QueryClientProvider>,
+		),
+	};
 };
+
+const keyUncertainty = (): Issue => ({
+	...existingIssue(),
+	type: 'Uncertainty',
+	boundary: 'in',
+});
+
+const probabilityFor = (issue: Issue, outcomeIndex: number, probability: number) => ({
+	id: '00000000-0000-4000-8000-0000000000a1',
+	outcome_id: issue.uncertainty.outcomes[outcomeIndex].id,
+	uncertainty_id: issue.uncertainty.id,
+	project_id: project.id,
+	parent_option_ids: [],
+	parent_outcome_ids: [],
+	probability,
+});
 
 beforeEach(() => {
 	savedIssues = [];
 	savedRequests = [];
+	requestBodies = [];
+	failingUrls = new Set();
+	heldIssueUpdate = undefined;
 	apiClient.interceptors.request.clear();
 	apiClient.defaults.adapter = adapter;
 });
@@ -157,6 +194,26 @@ describe('full issue forms', () => {
 			expect(screen.getByRole('button', { name: 'Update uncertainty' })).toBeDisabled(),
 		);
 		expect(screen.getByRole('dialog')).toBeInTheDocument();
+	});
+
+	it('offers a disabled Utility table with its parent-edge explanation, but no tables for excluded Issues', async () => {
+		const issue = { ...existingIssue(), type: 'Utility' as const, boundary: 'in' as const };
+		const { unmount } = renderForm(<EditIssueSheet issue={issue} open onClose={vi.fn()} />, [
+			issue,
+		]);
+		expect(screen.getByRole('tab', { name: 'Utility table' })).toHaveAttribute(
+			'aria-disabled',
+			'true',
+		);
+		expect(
+			screen.getByText('Connect 2+ parent nodes to enable utility table and solver'),
+		).toBeInTheDocument();
+		unmount();
+		renderForm(
+			<EditIssueSheet issue={{ ...issue, boundary: 'out' }} open onClose={vi.fn()} />,
+			[issue],
+		);
+		expect(screen.queryByRole('tab', { name: /table/ })).not.toBeInTheDocument();
 	});
 
 	it('keeps the workspace interactive while the sheet is open', async () => {
@@ -284,6 +341,150 @@ describe('full issue forms', () => {
 		await user.click(screen.getByRole('button', { name: 'Update uncertainty' }));
 		await waitFor(() => expect(screen.getByLabelText('Evidence')).toBeEmptyDOMElement());
 		expect(screen.getByRole('radio', { name: 'Override outcome 1' })).toBeEnabled();
+	});
+
+	it('keeps dirty Details across tabs, keeps the table editable, and stays open on Details after exclusion', async () => {
+		const user = userEvent.setup();
+		const issue = { ...existingIssue(), type: 'Uncertainty' as const, boundary: 'in' as const };
+		renderForm(
+			<ProjectIssueEditor issueId={issue.id} open onClose={vi.fn()} />,
+			[issue],
+			[probabilityFor(issue, 0, 1)],
+		);
+		await user.click(screen.getByRole('tab', { name: 'Probability table' }));
+		expect(screen.getByRole('spinbutton')).toBeEnabled();
+		expect(screen.getByRole('spinbutton').closest('[inert]')).toBeNull();
+		expect(screen.getByRole('button', { name: 'Reset all' })).toBeInTheDocument();
+		await user.click(screen.getByRole('tab', { name: 'Details' }));
+		await user.type(screen.getByRole('textbox', { name: 'Issue name' }), ' edited');
+		await user.click(screen.getByRole('switch', { name: 'Is key' }));
+		await user.click(screen.getByRole('tab', { name: 'Probability table' }));
+		expect(
+			screen.queryByText('The table is disabled until your changes are saved'),
+		).not.toBeInTheDocument();
+		expect(screen.getByRole('spinbutton').closest('[inert]')).toBeNull();
+		await user.click(screen.getByRole('button', { name: 'Update uncertainty' }));
+		await waitFor(() =>
+			expect(
+				screen.queryByRole('tab', { name: 'Probability table' }),
+			).not.toBeInTheDocument(),
+		);
+		expect(screen.getByRole('textbox', { name: 'Issue name' })).toHaveValue(
+			`${issue.name} edited`,
+		);
+		expect(screen.getByRole('dialog')).toBeInTheDocument();
+		expect(screen.getByRole('button', { name: 'Update uncertainty' })).toBeDisabled();
+	});
+
+	it('reshapes the Probability table from unsaved States and saves the Issue, then its edited cells, with one Update', async () => {
+		const user = userEvent.setup();
+		const issue = keyUncertainty();
+		const { queryClient } = renderForm(
+			<ProjectIssueEditor issueId={issue.id} open onClose={vi.fn()} />,
+			[issue],
+			[probabilityFor(issue, 0, 1)],
+		);
+		await user.click(screen.getByRole('button', { name: 'Add outcome' }));
+		await user.type(screen.getByRole('textbox', { name: 'Outcome 2 name' }), 'Second');
+		await user.click(screen.getByRole('tab', { name: 'Probability table' }));
+		const [, added] = screen.getAllByRole('spinbutton');
+		expect(added).toHaveValue(0);
+		await user.clear(added);
+		await user.type(added, '0.5');
+		await user.tab();
+
+		let releaseIssueUpdate = () => {};
+		heldIssueUpdate = new Promise(resolve => (releaseIssueUpdate = resolve));
+		await user.click(screen.getByRole('button', { name: 'Update uncertainty' }));
+		const addedOutcomeId = await waitFor(() => {
+			const cached = queryClient.getQueryData<Issue[]>(['issues'])![0];
+			expect(cached.uncertainty.outcomes).toHaveLength(2);
+			return cached.uncertainty.outcomes[1].id;
+		});
+		const addedCellId = getDeterministicProbabilityId(issue.id, addedOutcomeId, [], []);
+		expect(
+			queryClient
+				.getQueryData<DiscreteProbability[]>(['probabilityTables'])!
+				.map(probability => probability.id),
+		).toContain(addedCellId);
+		releaseIssueUpdate();
+
+		await waitFor(() =>
+			expect(savedRequests.map(request => request.url)).toEqual([
+				'/issues',
+				'/discrete_probabilities',
+			]),
+		);
+		expect(requestBodies[1].data).toEqual([
+			expect.objectContaining({ id: addedCellId, probability: 0.5 }),
+		]);
+		await waitFor(() =>
+			expect(screen.getByRole('button', { name: 'Update uncertainty' })).toBeDisabled(),
+		);
+	});
+
+	it('keeps unsaved table values when saving them fails after the Issue saved, and retries only the table', async () => {
+		const user = userEvent.setup();
+		const issue = keyUncertainty();
+		renderForm(
+			<ProjectIssueEditor issueId={issue.id} open onClose={vi.fn()} />,
+			[issue],
+			[probabilityFor(issue, 0, 1)],
+		);
+		await user.type(screen.getByRole('textbox', { name: 'Issue name' }), ' edited');
+		await user.click(screen.getByRole('tab', { name: 'Probability table' }));
+		const cell = screen.getByRole('spinbutton');
+		await user.clear(cell);
+		await user.type(cell, '0.25');
+		await user.tab();
+		failingUrls.add('/discrete_probabilities');
+		await user.click(screen.getByRole('button', { name: 'Update uncertainty' }));
+
+		await waitFor(() =>
+			expect(screen.getByRole('button', { name: 'Update uncertainty' })).toBeEnabled(),
+		);
+		expect(savedRequests.map(request => request.url)).toEqual(['/issues']);
+		expect(screen.getByRole('dialog')).toBeInTheDocument();
+		expect(screen.getByRole('spinbutton')).toHaveValue(0.25);
+
+		failingUrls.clear();
+		await user.click(screen.getByRole('button', { name: 'Update uncertainty' }));
+		await waitFor(() =>
+			expect(savedRequests.map(request => request.url)).toEqual([
+				'/issues',
+				'/discrete_probabilities',
+			]),
+		);
+		expect(requestBodies[1].data).toEqual([
+			expect.objectContaining({ id: probabilityFor(issue, 0, 1).id, probability: 0.25 }),
+		]);
+	});
+
+	it('retains clean table selection after saving and warns about boundary exclusion on either tab', async () => {
+		const user = userEvent.setup();
+		const issue = { ...existingIssue(), type: 'Uncertainty' as const, boundary: 'in' as const };
+		renderForm(<ProjectIssueEditor issueId={issue.id} open onClose={vi.fn()} />, [issue]);
+		await user.click(screen.getByRole('button', { name: 'Boundary: In' }));
+		await user.click(screen.getByRole('menuitem', { name: 'Out' }));
+		await user.click(screen.getByRole('tab', { name: 'Probability table' }));
+		expect(
+			screen.getByText(
+				'Issues outside the boundary aren’t shown in the influence diagram. Updating will remove this node.',
+			),
+		).toBeInTheDocument();
+		await user.click(screen.getByRole('button', { name: 'Boundary: Out' }));
+		await user.click(screen.getByRole('menuitem', { name: 'On' }));
+		await user.click(screen.getByRole('button', { name: 'Update uncertainty' }));
+		await waitFor(() =>
+			expect(screen.getByRole('button', { name: 'Update uncertainty' })).toBeDisabled(),
+		);
+		expect(screen.getByRole('tab', { name: 'Probability table' })).toHaveAttribute(
+			'aria-selected',
+			'true',
+		);
+		expect(
+			screen.queryByText('The table is disabled until your changes are saved'),
+		).not.toBeInTheDocument();
 	});
 
 	it.each(['Discard changes', 'Escape'])(

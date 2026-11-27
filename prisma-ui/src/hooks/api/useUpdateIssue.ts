@@ -2,17 +2,25 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '../../api';
 import { Issue } from '../../validators';
 import { showErrorToast } from '../../components/ShowToast';
+import {
+	applyOptimisticTables,
+	restoreTables,
+	withUpdatedIssues,
+} from '../../utils/tableShapes/applyOptimisticTables';
 import { issueMutationScope } from './useUpdateIssues';
 
-export const useUpdateIssue = ({ onSuccess }: { onSuccess?: () => void | Promise<void> }) => {
+export const useUpdateIssue = ({ onSuccess }: { onSuccess?: () => void | Promise<void> } = {}) => {
 	const queryClient = useQueryClient();
 	return useMutation({
 		scope: issueMutationScope,
-		mutationFn: async (issue: Issue | (() => Issue)) => {
-			const updated = typeof issue === 'function' ? issue() : issue;
-			const res = await apiClient.put('/issues', [updated]);
+		mutationFn: async (issue: Issue) => {
+			const res = await apiClient.put('/issues', [issue]);
 			return res.data;
 		},
+		onMutate: issue =>
+			applyOptimisticTables(queryClient, ({ issues }) => ({
+				issues: withUpdatedIssues(issues, [issue]),
+			})),
 		onSuccess: async () => {
 			queryClient.refetchQueries({ queryKey: ['issues'] });
 			queryClient.invalidateQueries({ queryKey: ['probabilityTables'] });
@@ -22,7 +30,8 @@ export const useUpdateIssue = ({ onSuccess }: { onSuccess?: () => void | Promise
 			queryClient.invalidateQueries({ queryKey: ['restrictionTables'] });
 			await onSuccess?.();
 		},
-		onError: () => {
+		onError: (_error, _issue, previous) => {
+			restoreTables(queryClient, previous);
 			showErrorToast('Failed to update issue');
 		},
 	});

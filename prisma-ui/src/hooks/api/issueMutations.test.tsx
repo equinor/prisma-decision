@@ -8,7 +8,7 @@ import { Issue } from '../../validators';
 import { useCreateIssue } from './useCreateIssue';
 import { useDeleteIssue } from './useDeleteIssue';
 import { useUpdateIssue } from './useUpdateIssue';
-import { useUpdateIssues, useUpdateIssuesOptimistic } from './useUpdateIssues';
+import { useUpdateIssuesOptimistic } from './useUpdateIssues';
 
 vi.mock('../../api', () => ({
 	apiClient: { get: vi.fn(), post: vi.fn(), put: vi.fn(), delete: vi.fn() },
@@ -63,7 +63,6 @@ test('create, updates, delete and Board creation share one request queue', async
 		() => ({
 			create: useCreateIssue({}),
 			update: useUpdateIssue({}),
-			bulk: useUpdateIssues(),
 			optimistic: useUpdateIssuesOptimistic(),
 			remove: useDeleteIssue(),
 			board: useCreateIssue({ onSuccess: vi.fn() }),
@@ -73,17 +72,16 @@ test('create, updates, delete and Board creation share one request queue', async
 	await act(async () => {
 		result.current.create.mutate(first);
 		result.current.update.mutate(first);
-		result.current.bulk.mutate([first]);
 		result.current.optimistic.mutate([first]);
 		result.current.remove.mutate(first.id);
 		result.current.board.mutate({ ...first, order: -1 });
 	});
 	expect(writes).toEqual(['create']);
-	for (let index = 0; index < 6; index++) {
+	for (let index = 0; index < 5; index++) {
 		await act(async () => releases[index]());
-		if (index < 5) await waitFor(() => expect(writes).toHaveLength(index + 2));
+		if (index < 4) await waitFor(() => expect(writes).toHaveLength(index + 2));
 	}
-	expect(writes).toEqual(['create', 'update', 'update', 'update', 'delete', 'create']);
+	expect(writes).toEqual(['create', 'update', 'update', 'delete', 'create']);
 	expect(apiClient.post).toHaveBeenLastCalledWith('/issues', [{ ...first, order: -1 }]);
 	expect(peak).toBe(1);
 });
