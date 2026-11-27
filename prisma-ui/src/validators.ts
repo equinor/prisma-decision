@@ -24,6 +24,19 @@ export const BOTTOM_LAYER_Z_INDEX = 0;
 const requiredText = (message: string) =>
 	z.string().refine(value => value.trim().length > 0, message);
 
+export const gitHubIssueTypes = ['Bug', 'Task', 'Feature'] as const;
+
+export type GitHubIssueTypes = (typeof gitHubIssueTypes)[number];
+
+export const gitHubIssueSchema = z.object({
+	type: z.enum(gitHubIssueTypes),
+	feedback: requiredText('Feedback is required').max(60000, 'Feedback is too long'),
+	issue_number: z.number().int().positive().optional(),
+	issue_url: z.url().optional(),
+});
+
+export type GitHubIssue = z.infer<typeof gitHubIssueSchema>;
+
 export const objectiveSchema = z.object({
 	id: z.guid(),
 	name: z.string().min(1, 'Objective name is required'),
