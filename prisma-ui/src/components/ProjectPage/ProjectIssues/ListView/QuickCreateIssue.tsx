@@ -3,7 +3,7 @@ import { useIssueForm } from '../../../../hooks/useIssueForm';
 import { issueTypes } from '../../../../validators';
 import { IssueTypeIcon } from '../../../common/IssueTypeIcon';
 import { SegmentedSelector } from '../../../common/SegmentedSelector';
-import { useFormState, useWatch } from 'react-hook-form';
+import { useController, useFormState, useWatch } from 'react-hook-form';
 
 export const QuickCreateIssue = ({ onCreated }: { onCreated: (id: string) => void }) => {
 	const {
@@ -23,6 +23,8 @@ export const QuickCreateIssue = ({ onCreated }: { onCreated: (id: string) => voi
 	const pending = isSubmitting || isPending;
 	const { isValid } = useFormState({ control });
 	const [type, boundary] = useWatch({ control, name: ['type', 'boundary'] });
+	const { field: nameField } = useController({ control, name: 'name' });
+	const { field: descriptionField } = useController({ control, name: 'description' });
 
 	return (
 		<form aria-label='Quick-create issue' onSubmit={onSubmit} className='w-full'>
@@ -33,17 +35,19 @@ export const QuickCreateIssue = ({ onCreated }: { onCreated: (id: string) => voi
 				<TextField
 					aria-label='Issue name'
 					placeholder='Issue name (required)'
-					{...register('name')}
+					{...nameField}
 					invalid={!!errors.name}
 					helperMessage={errors.name?.message}
 				/>
+
 				<TextField
 					aria-label='Description'
 					placeholder='Description (required)'
-					{...register('description')}
+					{...descriptionField}
 					invalid={!!errors.description}
 					helperMessage={errors.description?.message}
 				/>
+
 				<SegmentedSelector
 					label='Issue type'
 					{...register('type')}
