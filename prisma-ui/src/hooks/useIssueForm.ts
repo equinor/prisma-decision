@@ -52,13 +52,14 @@ export const useIssueForm = ({
 	}, [issue]);
 	const formMethods = useForm({
 		mode: 'onChange',
-		values: { ...defaultValues, ...sortedIssue },
+		values: { ...defaultValues },
 		resolver: zodResolver(issueSchema),
 	});
 	const { issues } = useGetIssues();
 	const { mutate: createIssue, isPending: isCreating } = useCreateIssue({
 		onSuccess: () => {
 			const { id, type, boundary } = formMethods.getValues();
+			console.log('Issue created successfully', createIssueDraft(selectedProject.id));
 			formMethods.reset({ ...createIssueDraft(selectedProject.id), type, boundary });
 			onSuccess?.(id);
 		},
