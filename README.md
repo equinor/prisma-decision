@@ -6,6 +6,7 @@ This repository contains:
 
 - [`prisma-ui`](prisma-ui/) — the React user interface
 - [`prisma-api`](prisma-api/) — the .NET API with its database migrations, and the Python solver service it calls
+- [`prisma-infra`](prisma-infra/) — the Azure infrastructure and operational scripts
 
 ## Getting started
 
@@ -29,6 +30,7 @@ Useful tasks:
 | `mise run check` | Run the same API and UI checks as CI |
 | `mise run test` | Run all API, solver and UI tests |
 | `mise run db:migration:add <name>` | Add an EF Core migration for SQLite and SQL Server |
+| `mise run infra:check` | Check infrastructure templates and release detection without deploying |
 
 Run `mise tasks` to list all available tasks.
 
@@ -37,5 +39,6 @@ Run `mise tasks` to list all available tasks.
 - [UI](prisma-ui/README.md)
 - [API and solver](prisma-api/README.md)
 - [Build and release](prisma-api/docs/build-and-release.md)
+- [Infrastructure deployment](prisma-infra/README.md)
 - [Contributing](CONTRIBUTING.md)
 - [Prisma Decisions Docs](https://github.com/equinor/prisma-decision-docs)

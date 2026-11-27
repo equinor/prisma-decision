@@ -21,6 +21,10 @@
     "prisma-api": {
       "release-type": "simple",
       "component": "prisma-api"
+    },
+    "prisma-infra": {
+      "release-type": "simple",
+      "component": "prisma-infra"
     }
   }
 }

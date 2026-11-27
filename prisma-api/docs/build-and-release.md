@@ -1,6 +1,6 @@
 # Build & Release
 
-All Prisma components (`prisma-ui`, `prisma-api`) share one release flow driven by
+All Prisma components (`prisma-ui`, `prisma-api`, `prisma-infra`) share one release flow driven by
 [release-please](../../release-please-config.json). Each component gets its own release PR and its
 own tag prefix, and release-please also keeps one combined release PR open
 ([config](../../release-please-config.all.json)) that releases every component with pending changes
@@ -9,6 +9,18 @@ any that still have changes.
 
 `prisma-api` covers both the .NET API (`prisma-api/src`) and the solver (`prisma-api/solver`), since
 they are components of the same Radix application.
+
+## Infrastructure
+
+Infrastructure has its own release PR and `prisma-infra-vX.Y.Z` tags. Merging its release PR
+deploys production infrastructure before release-please creates any component tags, so a combined
+release cannot deploy an API that depends on infrastructure that has not been applied.
+If the infrastructure deployment fails, no component tags are created.
+
+Infrastructure changes deploy to DEV after merging to `main`. `mise run release:test` and
+`mise run release:public` deploy infrastructure to that environment before moving its tag.
+See [Infrastructure deployment](../../prisma-infra/README.md)
+for authentication, commands and the repository cutover.
 
 ## Backend
 
@@ -32,16 +44,19 @@ they are components of the same Radix application.
 ## Test, public, design and ai
 
 TEST, PUBLIC, DESIGN and AI build the UI and API from shared moving tags. Check out the commit to deploy
-and run:
+(it must be pushed to GitHub) and run:
 
 ```console
-mise run release:test     # moves TEST: deploys the test environment
-mise run release:public   # moves PUBLIC: deploys the public environment
+mise run release:test     # deploys infrastructure, moves TEST, then migrates the test database
+mise run release:public   # deploys infrastructure, moves PUBLIC, then migrates the public database
 mise run release:design   # moves DESIGN: deploys the design environment
 mise run release:ai       # moves AI: deploys the ai environment (UI only)
 ```
 
-Pushing `TEST` or `PUBLIC` also applies the migrations to that environment's database. The design
+Test and public follow the same order as production: the
+[release-environment workflow](../../.github/workflows/release-environment.yml) deploys the
+infrastructure first, moves the tag only if that succeeds, and then applies the migrations. Don't
+push `TEST` or `PUBLIC` by hand; that skips the infrastructure and migrations. The design
 and ai environments use the public database and do not migrate it. The ai environment only
 deploys the UI, which calls the public API.
 

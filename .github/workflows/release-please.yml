@@ -5,7 +5,9 @@ on:
         paths:
             - "prisma-ui/**"
             - "prisma-api/**"
+            - "prisma-infra/**"
             - ".github/workflows/release-please.yml"
+            - ".github/workflows/infra-deploy.yml"
             - ".release-please-manifest.json"
             - "release-please-config.json"
             - "release-please-config.all.json"
@@ -18,17 +20,66 @@ permissions:
 name: release-please
 
 jobs:
+    detect-infra-release:
+        runs-on: ubuntu-latest
+        outputs:
+            infra-release: ${{ steps.detect.outputs.infra-release }}
+        steps:
+            - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+              with:
+                  fetch-depth: 0
+                  persist-credentials: false
+            - id: detect
+              run: bash prisma-infra/scripts/release-needed.sh
+
+    # GITHUB_TOKEN-created tags cannot trigger another Actions workflow.
+    # Deploy first so combined releases cannot start the API before its infrastructure.
+    deploy-infra-prod:
+        needs: detect-infra-release
+        if: needs.detect-infra-release.outputs.infra-release == 'true'
+        uses: ./.github/workflows/infra-deploy.yml
+        with:
+            env-name: prod
+            github-environment: Production
+
     release-please:
+        needs: [detect-infra-release, deploy-infra-prod]
+        if: >-
+            ${{ !cancelled() && needs.detect-infra-release.result == 'success' &&
+                (needs.deploy-infra-prod.result == 'success' || needs.deploy-infra-prod.result == 'skipped') }}
         runs-on: ubuntu-latest
         outputs:
             api-release-created: ${{ steps.release.outputs['prisma-api--release_created'] }}
             any-release-created: ${{ steps.release.outputs.releases_created }}
         steps:
+            # release-please releases from the live main, not this run's commit. If main
+            # has since gained an infrastructure release, leave publishing to that push's
+            # run so its tags cannot be created before production infrastructure deploys.
+            - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+              with:
+                  ref: ${{ github.event.repository.default_branch }}
+                  fetch-depth: 0
+                  persist-credentials: false
+            - id: guard
+              env:
+                  DEPLOYED: ${{ needs.deploy-infra-prod.result == 'success' }}
+              run: |
+                  live=$(mktemp)
+                  GITHUB_OUTPUT="$live" bash prisma-infra/scripts/release-needed.sh
+                  version() { git show "$1:.release-please-manifest.json" | jq -er '."prisma-infra"'; }
+                  if grep -qx "infra-release=true" "$live" &&
+                      ! { [ "$DEPLOYED" = true ] && [ "$(version HEAD)" = "$(version "$GITHUB_SHA")" ]; }; then
+                      echo "::notice::main has an undeployed infrastructure release; a newer run will publish."
+                      echo "publish=false" >> "$GITHUB_OUTPUT"
+                  else
+                      echo "publish=true" >> "$GITHUB_OUTPUT"
+                  fi
             # Only creates releases/tags (for both per-component and combined
             # PRs). Release PRs are maintained in the release-prs job so a
             # failure there cannot block the production jobs below.
             - uses: googleapis/release-please-action@v5
               id: release
+              if: steps.guard.outputs.publish == 'true'
               with:
                   skip-github-pull-request: true
 
@@ -66,7 +117,7 @@ jobs:
 
     migrate-api-prod:
         needs: release-please
-        if: needs.release-please.outputs.api-release-created == 'true'
+        if: ${{ !cancelled() && needs.release-please.result == 'success' && needs.release-please.outputs.api-release-created == 'true' }}
         uses: ./.github/workflows/api-ef-migrations.yml
         with:
             env-name: Production

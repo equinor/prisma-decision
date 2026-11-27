@@ -6,9 +6,6 @@ on:
             - main
         paths:
             - "prisma-api/src/SqlServerMigrations/**"
-        tags:
-            - "TEST" # migrates test alongside the Radix test deployment
-            - "PUBLIC" # migrates public alongside the Radix public deployment
     workflow_dispatch:
         inputs:
             env-name:
@@ -21,6 +18,10 @@ on:
             env-name:
                 type: string
                 default: Development
+            ref:
+                description: Commit to migrate from; defaults to the triggering commit
+                type: string
+                default: ""
 
 permissions: {}
 
@@ -30,13 +31,15 @@ jobs:
         permissions:
             id-token: write
             contents: read
-        # Prod is migrated from release-please.yml when a prisma-api release is created.
+        # Prod is migrated from release-please.yml when a prisma-api release is created; test and
+        # public from release-environment.yml after their infrastructure is deployed.
         # The GitHub environment holds AZURE_CLIENT_ID, AZURE_TENANT_ID, AZURE_SUBSCRIPTION_ID,
         # AZURE_RESOURCE_GROUP and AZURE_SQL_SERVER_NAME.
-        environment: ${{ inputs.env-name || (github.ref == 'refs/tags/TEST' && 'Test') || (github.ref == 'refs/tags/PUBLIC' && 'Public') || 'Development' }}
+        environment: ${{ inputs.env-name || 'Development' }}
         steps:
             - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
               with:
+                  ref: ${{ inputs.ref }}
                   persist-credentials: false
 
             - name: Install Azure CLI
@@ -86,7 +89,7 @@ jobs:
             - name: Run migration
               working-directory: prisma-api/src
               env:
-                  ASPNETCORE_ENVIRONMENT: ${{ inputs.env-name || (github.ref == 'refs/tags/TEST' && 'Test') || (github.ref == 'refs/tags/PUBLIC' && 'Public') || 'Development' }}
+                  ASPNETCORE_ENVIRONMENT: ${{ inputs.env-name || 'Development' }}
               run: |
                   dotnet ef database update --project ./SqlServerMigrations/SqlServerMigrations.csproj --startup-project ./PrismaApi.Api/PrismaApi.Api.csproj -- --provider=sqlserver
 

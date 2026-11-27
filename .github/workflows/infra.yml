@@ -1,0 +1,42 @@
+name: Infra
+
+on:
+    pull_request:
+        paths:
+            - "prisma-infra/**"
+            - ".github/workflows/infra.yml"
+            - ".github/workflows/infra-deploy.yml"
+    push:
+        branches:
+            - main
+        paths:
+            - "prisma-infra/**"
+            - ".github/workflows/infra.yml"
+            - ".github/workflows/infra-deploy.yml"
+
+permissions:
+    contents: read
+
+jobs:
+    lint:
+        name: Infrastructure checks
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+              with:
+                  persist-credentials: false
+            - name: Build Bicep
+              run: az bicep build --file prisma-infra/bicep/main.bicep --stdout > /dev/null
+            - name: Check release detection
+              run: node --test prisma-infra/scripts/release-needed.test.mjs
+
+    deploy-dev:
+        needs: lint
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        permissions:
+            id-token: write
+            contents: read
+        uses: ./.github/workflows/infra-deploy.yml
+        with:
+            env-name: dev
+            github-environment: Development

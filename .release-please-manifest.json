@@ -1,4 +1,5 @@
 {
   "prisma-ui": "1.1.0",
-  "prisma-api": "1.3.3"
+  "prisma-api": "1.3.3",
+  "prisma-infra": "0.2.7"
 }
