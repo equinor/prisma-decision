@@ -4,6 +4,7 @@ on:
     pull_request:
         paths:
             - "prisma-api/**"
+            - "test-fixtures/**"
             - ".github/workflows/api-pull-request.yml"
 
 permissions: {}

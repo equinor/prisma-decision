@@ -38,3 +38,19 @@ _Avoid_: Issue title
 **Draft**:
 An Issue being prepared that has not yet been added to the project.
 _Avoid_: Composer
+
+**Parent**:
+An Issue whose States condition another Issue's table, through an edge into that Issue. Only in-scope key Uncertainties and Focus Decisions count as Parents.
+
+**Probability table**:
+The probabilities of an Uncertainty's Outcomes for each combination of its Parents' States.
+
+**Utility table**:
+The value of a Utility for each combination of its Parents' States.
+
+**Restriction table**:
+For one edge, whether each State of the tail Issue is compatible with each State of the head Issue.
+
+**Table shape**:
+The set of cells a Probability table, Utility table or Restriction table must have, given the States of the Issues involved. Rebuilding a table brings its cells in line with its Table shape while keeping the values of cells that still exist.
+_Avoid_: table dimension

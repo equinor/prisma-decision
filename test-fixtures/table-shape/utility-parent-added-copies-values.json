@@ -1,0 +1,182 @@
+{
+	"description": "Connecting a new Parent copies each existing Utility value across the new Parent States.",
+	"input": {
+		"issues": [
+			{
+				"id": "0d0e13f6-9b62-409d-b149-f608774654d3",
+				"project_id": "4796dd8c-0e48-42b8-8bcb-88f1bce2ce65",
+				"type": "Decision",
+				"boundary": "on",
+				"node": {
+					"id": "211dbc31-87ec-4370-8256-4bc36178136a"
+				},
+				"uncertainty": null,
+				"decision": {
+					"id": "03a41f4f-b567-4cd0-a2b5-a264fddb1730",
+					"type": "Focus",
+					"options": [
+						{
+							"id": "7027714f-42ca-4707-bc82-c2a28bf4a14d"
+						},
+						{
+							"id": "d9811e34-58ea-4acb-8ed6-b110c56f62a7"
+						}
+					]
+				},
+				"utility": null
+			},
+			{
+				"id": "1ba0f966-7f9b-461a-890c-1a16de9836cc",
+				"project_id": "4796dd8c-0e48-42b8-8bcb-88f1bce2ce65",
+				"type": "Uncertainty",
+				"boundary": "in",
+				"node": {
+					"id": "ead296da-d8d7-42a8-9a23-a7a12a6373ae"
+				},
+				"uncertainty": {
+					"id": "10ae83cf-7d8a-4d29-b2cd-d07562d07805",
+					"is_key": true,
+					"outcomes": [
+						{
+							"id": "4e737562-976d-4611-bf1c-06cfc7933924"
+						},
+						{
+							"id": "3b862dc3-a6c8-4f18-b60e-afdefabeb78e"
+						}
+					]
+				},
+				"decision": null,
+				"utility": null
+			},
+			{
+				"id": "1f7100b3-2011-4a98-a73a-2d826dbd929d",
+				"project_id": "4796dd8c-0e48-42b8-8bcb-88f1bce2ce65",
+				"type": "Utility",
+				"boundary": "in",
+				"node": {
+					"id": "f8b2daaf-4f00-440f-b1e9-540c4af31462"
+				},
+				"uncertainty": null,
+				"decision": null,
+				"utility": {
+					"id": "611cebf8-b0bb-48ab-8581-64dde45d8b7c"
+				}
+			}
+		],
+		"edges": [
+			{
+				"id": "31eb3f38-9434-40a8-bb91-679e5902e079",
+				"tail_id": "211dbc31-87ec-4370-8256-4bc36178136a",
+				"head_id": "f8b2daaf-4f00-440f-b1e9-540c4af31462"
+			},
+			{
+				"id": "11fb87ed-fc3c-4040-9e0b-f21fa3a44e37",
+				"tail_id": "ead296da-d8d7-42a8-9a23-a7a12a6373ae",
+				"head_id": "f8b2daaf-4f00-440f-b1e9-540c4af31462"
+			}
+		],
+		"discrete_probabilities": [],
+		"discrete_utilities": [
+			{
+				"id": "d344c519-51f5-4989-a11a-710d46a24312",
+				"value_metric_id": "288e0811-7ab6-5d24-b80c-9fa925b848a6",
+				"utility_id": "611cebf8-b0bb-48ab-8581-64dde45d8b7c",
+				"project_id": "4796dd8c-0e48-42b8-8bcb-88f1bce2ce65",
+				"utility_value": 10,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"7027714f-42ca-4707-bc82-c2a28bf4a14d"
+				]
+			},
+			{
+				"id": "9b87be60-065c-47f9-8d8e-fd7cd1871942",
+				"value_metric_id": "288e0811-7ab6-5d24-b80c-9fa925b848a6",
+				"utility_id": "611cebf8-b0bb-48ab-8581-64dde45d8b7c",
+				"project_id": "4796dd8c-0e48-42b8-8bcb-88f1bce2ce65",
+				"utility_value": -5,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"d9811e34-58ea-4acb-8ed6-b110c56f62a7"
+				]
+			}
+		],
+		"restriction_tables": []
+	},
+	"expected": {
+		"discrete_probabilities": [
+			{
+				"id": "95e94834-751b-8d20-9816-c90ea27b9e8a",
+				"outcome_id": "4e737562-976d-4611-bf1c-06cfc7933924",
+				"uncertainty_id": "10ae83cf-7d8a-4d29-b2cd-d07562d07805",
+				"project_id": "4796dd8c-0e48-42b8-8bcb-88f1bce2ce65",
+				"probability": 0,
+				"parent_outcome_ids": [],
+				"parent_option_ids": []
+			},
+			{
+				"id": "cc28f35a-4428-61a0-98d7-08c70710617f",
+				"outcome_id": "3b862dc3-a6c8-4f18-b60e-afdefabeb78e",
+				"uncertainty_id": "10ae83cf-7d8a-4d29-b2cd-d07562d07805",
+				"project_id": "4796dd8c-0e48-42b8-8bcb-88f1bce2ce65",
+				"probability": 0,
+				"parent_outcome_ids": [],
+				"parent_option_ids": []
+			}
+		],
+		"discrete_utilities": [
+			{
+				"id": "2ed1cafc-1fdc-a531-be4e-aee999822974",
+				"value_metric_id": "288e0811-7ab6-5d24-b80c-9fa925b848a6",
+				"utility_id": "611cebf8-b0bb-48ab-8581-64dde45d8b7c",
+				"utility_value": -5,
+				"parent_outcome_ids": [
+					"3b862dc3-a6c8-4f18-b60e-afdefabeb78e"
+				],
+				"parent_option_ids": [
+					"d9811e34-58ea-4acb-8ed6-b110c56f62a7"
+				],
+				"project_id": "4796dd8c-0e48-42b8-8bcb-88f1bce2ce65"
+			},
+			{
+				"id": "6ffc81b9-c67c-583e-8a71-9c92972c259d",
+				"value_metric_id": "288e0811-7ab6-5d24-b80c-9fa925b848a6",
+				"utility_id": "611cebf8-b0bb-48ab-8581-64dde45d8b7c",
+				"utility_value": -5,
+				"parent_outcome_ids": [
+					"4e737562-976d-4611-bf1c-06cfc7933924"
+				],
+				"parent_option_ids": [
+					"d9811e34-58ea-4acb-8ed6-b110c56f62a7"
+				],
+				"project_id": "4796dd8c-0e48-42b8-8bcb-88f1bce2ce65"
+			},
+			{
+				"id": "8af8bc54-3bee-548f-d21a-ae4932cfa39c",
+				"value_metric_id": "288e0811-7ab6-5d24-b80c-9fa925b848a6",
+				"utility_id": "611cebf8-b0bb-48ab-8581-64dde45d8b7c",
+				"utility_value": 10,
+				"parent_outcome_ids": [
+					"4e737562-976d-4611-bf1c-06cfc7933924"
+				],
+				"parent_option_ids": [
+					"7027714f-42ca-4707-bc82-c2a28bf4a14d"
+				],
+				"project_id": "4796dd8c-0e48-42b8-8bcb-88f1bce2ce65"
+			},
+			{
+				"id": "ee96f899-60fd-4c30-bb6a-45464bdb47eb",
+				"value_metric_id": "288e0811-7ab6-5d24-b80c-9fa925b848a6",
+				"utility_id": "611cebf8-b0bb-48ab-8581-64dde45d8b7c",
+				"utility_value": 10,
+				"parent_outcome_ids": [
+					"3b862dc3-a6c8-4f18-b60e-afdefabeb78e"
+				],
+				"parent_option_ids": [
+					"7027714f-42ca-4707-bc82-c2a28bf4a14d"
+				],
+				"project_id": "4796dd8c-0e48-42b8-8bcb-88f1bce2ce65"
+			}
+		],
+		"restriction_tables": []
+	}
+}

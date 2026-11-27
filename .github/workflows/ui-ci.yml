@@ -8,6 +8,7 @@ on:
             - synchronize
         paths:
             - "prisma-ui/**"
+            - "test-fixtures/**"
             - ".github/workflows/ui-ci.yml"
 
 permissions:

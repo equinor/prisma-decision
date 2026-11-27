@@ -1,0 +1,681 @@
+{
+	"description": "A Utility table over 500 cells is cleared.",
+	"input": {
+		"issues": [
+			{
+				"id": "064e9fc7-ca66-4004-8f03-931b001ba9f2",
+				"project_id": "561561a1-f522-452e-9b23-bcc37fbbc019",
+				"type": "Decision",
+				"boundary": "on",
+				"node": {
+					"id": "363977c8-47af-4ce0-9fab-176b3837335e"
+				},
+				"uncertainty": null,
+				"decision": {
+					"id": "544e0968-7b58-42d2-b748-716203b8367c",
+					"type": "Focus",
+					"options": [
+						{
+							"id": "28dbd3ec-c35f-4453-bd5f-7e786517d139"
+						},
+						{
+							"id": "09710a83-b080-470d-898a-157d2ad6828d"
+						},
+						{
+							"id": "fea2e5fc-f4e6-47ee-8881-b5d8a9ec5752"
+						},
+						{
+							"id": "40f6db43-203a-4ea8-9e80-4a68ff543d70"
+						},
+						{
+							"id": "d2bc193c-3489-42b1-a455-3559d7811a38"
+						},
+						{
+							"id": "4b133e62-50bf-4893-ac9a-e766943733a2"
+						},
+						{
+							"id": "a6f6471d-09b7-48ab-8d71-97e5f3000be9"
+						},
+						{
+							"id": "2ca8938f-97a0-4938-a33d-2ea8d986166b"
+						},
+						{
+							"id": "34cb837d-aa59-4e6c-9fe7-38a28743020a"
+						},
+						{
+							"id": "fcc41d27-1af0-4966-bc5d-849defa494e9"
+						},
+						{
+							"id": "0b0c8c04-3ef0-4f59-99d4-7ca4fe902333"
+						},
+						{
+							"id": "fd7d3c18-cc95-419a-a1c8-d946d15212e6"
+						},
+						{
+							"id": "0f47b7e0-64ab-4e81-9769-b4df2f38872c"
+						},
+						{
+							"id": "f3a08912-98d0-430a-b2f9-0e590f8301c5"
+						},
+						{
+							"id": "4f056ce1-9cf0-4d43-b679-83af09be5603"
+						},
+						{
+							"id": "835492e1-ee85-4032-9aee-9c10f1c1896b"
+						},
+						{
+							"id": "9c7ee5d2-266b-45cb-a0a1-003b8ed179c5"
+						},
+						{
+							"id": "3fd40129-93a8-4c21-b3a7-0539a07d79c1"
+						},
+						{
+							"id": "9ce1e313-c5f6-4ee9-beb4-1c92aecf1f0c"
+						},
+						{
+							"id": "92082fd8-7619-472e-8da0-691e193a06c9"
+						},
+						{
+							"id": "cac9a40f-f028-41bc-936f-213b4ead4775"
+						},
+						{
+							"id": "38b4ae51-4d62-452b-b861-f26b26b80ef1"
+						},
+						{
+							"id": "f6664553-762c-4377-b987-24d6350fdb62"
+						},
+						{
+							"id": "05d86d1d-5b86-4ea3-b4da-1fcbdfd79e9b"
+						},
+						{
+							"id": "773a9e4e-f20b-4ba1-a0fc-f98a740ca869"
+						},
+						{
+							"id": "48544472-63d5-4215-b5a2-aac0eb726211"
+						}
+					]
+				},
+				"utility": null
+			},
+			{
+				"id": "e83827b8-ed8e-49f0-a78f-397396345dc8",
+				"project_id": "561561a1-f522-452e-9b23-bcc37fbbc019",
+				"type": "Uncertainty",
+				"boundary": "in",
+				"node": {
+					"id": "035ee62b-45ab-46f2-8f0d-05c29e839a42"
+				},
+				"uncertainty": {
+					"id": "4da98157-26a5-424f-a50e-3e9fcaced58e",
+					"is_key": true,
+					"outcomes": [
+						{
+							"id": "c9589adc-7494-4ae9-8c0a-be8e8cb6b125"
+						},
+						{
+							"id": "7dc4ff5f-d0cd-42f3-9a7f-43f3349d900e"
+						},
+						{
+							"id": "2257782f-0f83-427a-87b3-e7df03103b05"
+						},
+						{
+							"id": "ffd5f590-054e-408d-a45a-da1ad0d471f3"
+						},
+						{
+							"id": "7cfaa6fa-7af9-4f0c-849f-6843c9353756"
+						},
+						{
+							"id": "cb6b2f68-9a09-46b9-b372-ca73f02783f7"
+						},
+						{
+							"id": "96575cf8-30c7-4ac6-80e9-7ff0d5123d10"
+						},
+						{
+							"id": "1ec0e921-5abe-4d7e-835a-8723e3f34c44"
+						},
+						{
+							"id": "5ae811da-2c54-4c96-8533-c33207949750"
+						},
+						{
+							"id": "6740f3ca-dd24-4677-b007-76aa2959d88c"
+						},
+						{
+							"id": "fb7c186e-9caa-4508-b700-737e58ce0c82"
+						},
+						{
+							"id": "dc95ba28-bbd5-4270-a435-4c38c5b3db80"
+						},
+						{
+							"id": "fbdbc827-444c-4c4b-b68a-158610ef6e00"
+						},
+						{
+							"id": "39a4c95d-ee69-4cfe-8c98-c1331addd2d5"
+						},
+						{
+							"id": "10796fb6-a965-4bf5-b747-a898d4fc6ab2"
+						},
+						{
+							"id": "f654d667-89d3-407a-9aac-80f836171684"
+						},
+						{
+							"id": "30804059-bb77-4c95-81f3-9b1bfad64ff2"
+						},
+						{
+							"id": "0160da48-21cc-4acd-831f-666c7d2ca3c2"
+						},
+						{
+							"id": "986c4e4b-2d1a-45e4-ad60-8c3ae4092989"
+						},
+						{
+							"id": "c13f3bd2-a035-4e16-a8ad-14aa2e1e9d52"
+						}
+					]
+				},
+				"decision": null,
+				"utility": null
+			},
+			{
+				"id": "76dd8816-6369-4351-b6d4-03ee26c3933a",
+				"project_id": "561561a1-f522-452e-9b23-bcc37fbbc019",
+				"type": "Utility",
+				"boundary": "in",
+				"node": {
+					"id": "df058424-3af8-44b3-8895-dab3b7fa03a5"
+				},
+				"uncertainty": null,
+				"decision": null,
+				"utility": {
+					"id": "2204203d-8881-40f6-aa62-5b7610118643"
+				}
+			}
+		],
+		"edges": [
+			{
+				"id": "e83003ac-ae55-4d44-9a35-93f1bc8fdc31",
+				"tail_id": "363977c8-47af-4ce0-9fab-176b3837335e",
+				"head_id": "df058424-3af8-44b3-8895-dab3b7fa03a5"
+			},
+			{
+				"id": "1e474f56-90a7-4617-9e7c-645bd726ddad",
+				"tail_id": "035ee62b-45ab-46f2-8f0d-05c29e839a42",
+				"head_id": "df058424-3af8-44b3-8895-dab3b7fa03a5"
+			}
+		],
+		"discrete_probabilities": [],
+		"discrete_utilities": [
+			{
+				"id": "09e6da44-e58e-4553-904e-1c0ea2eb882a",
+				"value_metric_id": "288e0811-7ab6-5d24-b80c-9fa925b848a6",
+				"utility_id": "2204203d-8881-40f6-aa62-5b7610118643",
+				"project_id": "561561a1-f522-452e-9b23-bcc37fbbc019",
+				"utility_value": 10,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"28dbd3ec-c35f-4453-bd5f-7e786517d139"
+				]
+			},
+			{
+				"id": "bdd78c4a-436f-4261-b3be-4d37b576a0ac",
+				"value_metric_id": "288e0811-7ab6-5d24-b80c-9fa925b848a6",
+				"utility_id": "2204203d-8881-40f6-aa62-5b7610118643",
+				"project_id": "561561a1-f522-452e-9b23-bcc37fbbc019",
+				"utility_value": -5,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"09710a83-b080-470d-898a-157d2ad6828d"
+				]
+			},
+			{
+				"id": "e83d4464-aa54-4bee-9692-8c97d1eb47d1",
+				"value_metric_id": "288e0811-7ab6-5d24-b80c-9fa925b848a6",
+				"utility_id": "2204203d-8881-40f6-aa62-5b7610118643",
+				"project_id": "561561a1-f522-452e-9b23-bcc37fbbc019",
+				"utility_value": 2.5,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"fea2e5fc-f4e6-47ee-8881-b5d8a9ec5752"
+				]
+			},
+			{
+				"id": "80999c82-5d49-4dd2-812c-ec8096487727",
+				"value_metric_id": "288e0811-7ab6-5d24-b80c-9fa925b848a6",
+				"utility_id": "2204203d-8881-40f6-aa62-5b7610118643",
+				"project_id": "561561a1-f522-452e-9b23-bcc37fbbc019",
+				"utility_value": 7.75,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"40f6db43-203a-4ea8-9e80-4a68ff543d70"
+				]
+			},
+			{
+				"id": "bfb786b8-94db-418f-9aaa-5fd9108b5971",
+				"value_metric_id": "288e0811-7ab6-5d24-b80c-9fa925b848a6",
+				"utility_id": "2204203d-8881-40f6-aa62-5b7610118643",
+				"project_id": "561561a1-f522-452e-9b23-bcc37fbbc019",
+				"utility_value": 10,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"d2bc193c-3489-42b1-a455-3559d7811a38"
+				]
+			},
+			{
+				"id": "22aa9c29-2431-4cbc-8b79-0b340ea9ab7b",
+				"value_metric_id": "288e0811-7ab6-5d24-b80c-9fa925b848a6",
+				"utility_id": "2204203d-8881-40f6-aa62-5b7610118643",
+				"project_id": "561561a1-f522-452e-9b23-bcc37fbbc019",
+				"utility_value": -5,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"4b133e62-50bf-4893-ac9a-e766943733a2"
+				]
+			},
+			{
+				"id": "3b705ddb-4d5c-4267-a1d9-bd106a55e703",
+				"value_metric_id": "288e0811-7ab6-5d24-b80c-9fa925b848a6",
+				"utility_id": "2204203d-8881-40f6-aa62-5b7610118643",
+				"project_id": "561561a1-f522-452e-9b23-bcc37fbbc019",
+				"utility_value": 2.5,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"a6f6471d-09b7-48ab-8d71-97e5f3000be9"
+				]
+			},
+			{
+				"id": "dc13f319-d319-4149-b8d0-ca38bb4fb7c2",
+				"value_metric_id": "288e0811-7ab6-5d24-b80c-9fa925b848a6",
+				"utility_id": "2204203d-8881-40f6-aa62-5b7610118643",
+				"project_id": "561561a1-f522-452e-9b23-bcc37fbbc019",
+				"utility_value": 7.75,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"2ca8938f-97a0-4938-a33d-2ea8d986166b"
+				]
+			},
+			{
+				"id": "6fe49f9f-4b46-4f1a-b9bd-f6e8eea704df",
+				"value_metric_id": "288e0811-7ab6-5d24-b80c-9fa925b848a6",
+				"utility_id": "2204203d-8881-40f6-aa62-5b7610118643",
+				"project_id": "561561a1-f522-452e-9b23-bcc37fbbc019",
+				"utility_value": 10,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"34cb837d-aa59-4e6c-9fe7-38a28743020a"
+				]
+			},
+			{
+				"id": "0c89cec6-59ab-4414-a8a8-03644bf42649",
+				"value_metric_id": "288e0811-7ab6-5d24-b80c-9fa925b848a6",
+				"utility_id": "2204203d-8881-40f6-aa62-5b7610118643",
+				"project_id": "561561a1-f522-452e-9b23-bcc37fbbc019",
+				"utility_value": -5,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"fcc41d27-1af0-4966-bc5d-849defa494e9"
+				]
+			},
+			{
+				"id": "edd8e892-dc4c-461e-ae93-5722f08c2bed",
+				"value_metric_id": "288e0811-7ab6-5d24-b80c-9fa925b848a6",
+				"utility_id": "2204203d-8881-40f6-aa62-5b7610118643",
+				"project_id": "561561a1-f522-452e-9b23-bcc37fbbc019",
+				"utility_value": 2.5,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"0b0c8c04-3ef0-4f59-99d4-7ca4fe902333"
+				]
+			},
+			{
+				"id": "d09fe03d-39bd-424a-ab8a-ad3c537085bb",
+				"value_metric_id": "288e0811-7ab6-5d24-b80c-9fa925b848a6",
+				"utility_id": "2204203d-8881-40f6-aa62-5b7610118643",
+				"project_id": "561561a1-f522-452e-9b23-bcc37fbbc019",
+				"utility_value": 7.75,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"fd7d3c18-cc95-419a-a1c8-d946d15212e6"
+				]
+			},
+			{
+				"id": "ac7eaea3-e11a-4377-9b2d-5aa5788c7474",
+				"value_metric_id": "288e0811-7ab6-5d24-b80c-9fa925b848a6",
+				"utility_id": "2204203d-8881-40f6-aa62-5b7610118643",
+				"project_id": "561561a1-f522-452e-9b23-bcc37fbbc019",
+				"utility_value": 10,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"0f47b7e0-64ab-4e81-9769-b4df2f38872c"
+				]
+			},
+			{
+				"id": "9b2af9fa-9871-4f30-bab9-7e03ac27c415",
+				"value_metric_id": "288e0811-7ab6-5d24-b80c-9fa925b848a6",
+				"utility_id": "2204203d-8881-40f6-aa62-5b7610118643",
+				"project_id": "561561a1-f522-452e-9b23-bcc37fbbc019",
+				"utility_value": -5,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"f3a08912-98d0-430a-b2f9-0e590f8301c5"
+				]
+			},
+			{
+				"id": "410e8e87-d008-4de7-8422-99eefc946a7b",
+				"value_metric_id": "288e0811-7ab6-5d24-b80c-9fa925b848a6",
+				"utility_id": "2204203d-8881-40f6-aa62-5b7610118643",
+				"project_id": "561561a1-f522-452e-9b23-bcc37fbbc019",
+				"utility_value": 2.5,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"4f056ce1-9cf0-4d43-b679-83af09be5603"
+				]
+			},
+			{
+				"id": "ff4b98e2-7633-47f1-a044-89c74a90d864",
+				"value_metric_id": "288e0811-7ab6-5d24-b80c-9fa925b848a6",
+				"utility_id": "2204203d-8881-40f6-aa62-5b7610118643",
+				"project_id": "561561a1-f522-452e-9b23-bcc37fbbc019",
+				"utility_value": 7.75,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"835492e1-ee85-4032-9aee-9c10f1c1896b"
+				]
+			},
+			{
+				"id": "78186b08-2633-4531-83b0-2806e46fb638",
+				"value_metric_id": "288e0811-7ab6-5d24-b80c-9fa925b848a6",
+				"utility_id": "2204203d-8881-40f6-aa62-5b7610118643",
+				"project_id": "561561a1-f522-452e-9b23-bcc37fbbc019",
+				"utility_value": 10,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"9c7ee5d2-266b-45cb-a0a1-003b8ed179c5"
+				]
+			},
+			{
+				"id": "9e4b664d-dbc2-42b9-8268-cf85c6490b91",
+				"value_metric_id": "288e0811-7ab6-5d24-b80c-9fa925b848a6",
+				"utility_id": "2204203d-8881-40f6-aa62-5b7610118643",
+				"project_id": "561561a1-f522-452e-9b23-bcc37fbbc019",
+				"utility_value": -5,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"3fd40129-93a8-4c21-b3a7-0539a07d79c1"
+				]
+			},
+			{
+				"id": "fa6c5002-f07d-4498-9325-5bf073b93fa3",
+				"value_metric_id": "288e0811-7ab6-5d24-b80c-9fa925b848a6",
+				"utility_id": "2204203d-8881-40f6-aa62-5b7610118643",
+				"project_id": "561561a1-f522-452e-9b23-bcc37fbbc019",
+				"utility_value": 2.5,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"9ce1e313-c5f6-4ee9-beb4-1c92aecf1f0c"
+				]
+			},
+			{
+				"id": "0427b310-5b42-4266-8ede-591c0cdac39c",
+				"value_metric_id": "288e0811-7ab6-5d24-b80c-9fa925b848a6",
+				"utility_id": "2204203d-8881-40f6-aa62-5b7610118643",
+				"project_id": "561561a1-f522-452e-9b23-bcc37fbbc019",
+				"utility_value": 7.75,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"92082fd8-7619-472e-8da0-691e193a06c9"
+				]
+			},
+			{
+				"id": "9c5e30f4-7329-4fcf-992d-4696b52233b8",
+				"value_metric_id": "288e0811-7ab6-5d24-b80c-9fa925b848a6",
+				"utility_id": "2204203d-8881-40f6-aa62-5b7610118643",
+				"project_id": "561561a1-f522-452e-9b23-bcc37fbbc019",
+				"utility_value": 10,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"cac9a40f-f028-41bc-936f-213b4ead4775"
+				]
+			},
+			{
+				"id": "0ed1797c-8b10-4fb1-ab00-31e7bc2e06c2",
+				"value_metric_id": "288e0811-7ab6-5d24-b80c-9fa925b848a6",
+				"utility_id": "2204203d-8881-40f6-aa62-5b7610118643",
+				"project_id": "561561a1-f522-452e-9b23-bcc37fbbc019",
+				"utility_value": -5,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"38b4ae51-4d62-452b-b861-f26b26b80ef1"
+				]
+			},
+			{
+				"id": "73ccc313-31e7-408c-9e0e-d8f24022bda6",
+				"value_metric_id": "288e0811-7ab6-5d24-b80c-9fa925b848a6",
+				"utility_id": "2204203d-8881-40f6-aa62-5b7610118643",
+				"project_id": "561561a1-f522-452e-9b23-bcc37fbbc019",
+				"utility_value": 2.5,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"f6664553-762c-4377-b987-24d6350fdb62"
+				]
+			},
+			{
+				"id": "639a9a65-999e-4d18-8a28-e8f85e6b75e1",
+				"value_metric_id": "288e0811-7ab6-5d24-b80c-9fa925b848a6",
+				"utility_id": "2204203d-8881-40f6-aa62-5b7610118643",
+				"project_id": "561561a1-f522-452e-9b23-bcc37fbbc019",
+				"utility_value": 7.75,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"05d86d1d-5b86-4ea3-b4da-1fcbdfd79e9b"
+				]
+			},
+			{
+				"id": "8ecb282f-18bb-4eac-be44-81b07542353a",
+				"value_metric_id": "288e0811-7ab6-5d24-b80c-9fa925b848a6",
+				"utility_id": "2204203d-8881-40f6-aa62-5b7610118643",
+				"project_id": "561561a1-f522-452e-9b23-bcc37fbbc019",
+				"utility_value": 10,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"773a9e4e-f20b-4ba1-a0fc-f98a740ca869"
+				]
+			},
+			{
+				"id": "bddee4f6-2a73-484a-89af-66a6798ccba1",
+				"value_metric_id": "288e0811-7ab6-5d24-b80c-9fa925b848a6",
+				"utility_id": "2204203d-8881-40f6-aa62-5b7610118643",
+				"project_id": "561561a1-f522-452e-9b23-bcc37fbbc019",
+				"utility_value": -5,
+				"parent_outcome_ids": [],
+				"parent_option_ids": [
+					"48544472-63d5-4215-b5a2-aac0eb726211"
+				]
+			}
+		],
+		"restriction_tables": []
+	},
+	"expected": {
+		"discrete_probabilities": [
+			{
+				"id": "0c078484-38b2-9ee1-8238-841adce50ad8",
+				"outcome_id": "96575cf8-30c7-4ac6-80e9-7ff0d5123d10",
+				"uncertainty_id": "4da98157-26a5-424f-a50e-3e9fcaced58e",
+				"project_id": "561561a1-f522-452e-9b23-bcc37fbbc019",
+				"probability": 0,
+				"parent_outcome_ids": [],
+				"parent_option_ids": []
+			},
+			{
+				"id": "0efaff05-71a0-d909-7cdb-4fb7dd9d281f",
+				"outcome_id": "10796fb6-a965-4bf5-b747-a898d4fc6ab2",
+				"uncertainty_id": "4da98157-26a5-424f-a50e-3e9fcaced58e",
+				"project_id": "561561a1-f522-452e-9b23-bcc37fbbc019",
+				"probability": 0,
+				"parent_outcome_ids": [],
+				"parent_option_ids": []
+			},
+			{
+				"id": "128c3a53-a35f-046f-402f-fe6e56583276",
+				"outcome_id": "6740f3ca-dd24-4677-b007-76aa2959d88c",
+				"uncertainty_id": "4da98157-26a5-424f-a50e-3e9fcaced58e",
+				"project_id": "561561a1-f522-452e-9b23-bcc37fbbc019",
+				"probability": 0,
+				"parent_outcome_ids": [],
+				"parent_option_ids": []
+			},
+			{
+				"id": "14e20cc5-69cf-d580-cfea-9464417dd95e",
+				"outcome_id": "7dc4ff5f-d0cd-42f3-9a7f-43f3349d900e",
+				"uncertainty_id": "4da98157-26a5-424f-a50e-3e9fcaced58e",
+				"project_id": "561561a1-f522-452e-9b23-bcc37fbbc019",
+				"probability": 0,
+				"parent_outcome_ids": [],
+				"parent_option_ids": []
+			},
+			{
+				"id": "326f916c-714d-be24-9aa0-d2ec5de600c5",
+				"outcome_id": "fb7c186e-9caa-4508-b700-737e58ce0c82",
+				"uncertainty_id": "4da98157-26a5-424f-a50e-3e9fcaced58e",
+				"project_id": "561561a1-f522-452e-9b23-bcc37fbbc019",
+				"probability": 0,
+				"parent_outcome_ids": [],
+				"parent_option_ids": []
+			},
+			{
+				"id": "39b467cb-3eb4-93ba-1f30-b09da283f95b",
+				"outcome_id": "f654d667-89d3-407a-9aac-80f836171684",
+				"uncertainty_id": "4da98157-26a5-424f-a50e-3e9fcaced58e",
+				"project_id": "561561a1-f522-452e-9b23-bcc37fbbc019",
+				"probability": 0,
+				"parent_outcome_ids": [],
+				"parent_option_ids": []
+			},
+			{
+				"id": "52854330-ab86-7e8b-8d38-559d035d9b60",
+				"outcome_id": "ffd5f590-054e-408d-a45a-da1ad0d471f3",
+				"uncertainty_id": "4da98157-26a5-424f-a50e-3e9fcaced58e",
+				"project_id": "561561a1-f522-452e-9b23-bcc37fbbc019",
+				"probability": 0,
+				"parent_outcome_ids": [],
+				"parent_option_ids": []
+			},
+			{
+				"id": "59deaa02-2502-8488-0470-611fc50bfb77",
+				"outcome_id": "39a4c95d-ee69-4cfe-8c98-c1331addd2d5",
+				"uncertainty_id": "4da98157-26a5-424f-a50e-3e9fcaced58e",
+				"project_id": "561561a1-f522-452e-9b23-bcc37fbbc019",
+				"probability": 0,
+				"parent_outcome_ids": [],
+				"parent_option_ids": []
+			},
+			{
+				"id": "60595ffc-2b14-bd9e-7d76-673c62837185",
+				"outcome_id": "2257782f-0f83-427a-87b3-e7df03103b05",
+				"uncertainty_id": "4da98157-26a5-424f-a50e-3e9fcaced58e",
+				"project_id": "561561a1-f522-452e-9b23-bcc37fbbc019",
+				"probability": 0,
+				"parent_outcome_ids": [],
+				"parent_option_ids": []
+			},
+			{
+				"id": "65484f4b-05dc-3911-c32e-02d400117952",
+				"outcome_id": "1ec0e921-5abe-4d7e-835a-8723e3f34c44",
+				"uncertainty_id": "4da98157-26a5-424f-a50e-3e9fcaced58e",
+				"project_id": "561561a1-f522-452e-9b23-bcc37fbbc019",
+				"probability": 0,
+				"parent_outcome_ids": [],
+				"parent_option_ids": []
+			},
+			{
+				"id": "6b686c02-3624-9b57-408d-ac0b001b51e2",
+				"outcome_id": "7cfaa6fa-7af9-4f0c-849f-6843c9353756",
+				"uncertainty_id": "4da98157-26a5-424f-a50e-3e9fcaced58e",
+				"project_id": "561561a1-f522-452e-9b23-bcc37fbbc019",
+				"probability": 0,
+				"parent_outcome_ids": [],
+				"parent_option_ids": []
+			},
+			{
+				"id": "90f38e0c-3f21-39c7-d738-c6854b306ddb",
+				"outcome_id": "986c4e4b-2d1a-45e4-ad60-8c3ae4092989",
+				"uncertainty_id": "4da98157-26a5-424f-a50e-3e9fcaced58e",
+				"project_id": "561561a1-f522-452e-9b23-bcc37fbbc019",
+				"probability": 0,
+				"parent_outcome_ids": [],
+				"parent_option_ids": []
+			},
+			{
+				"id": "a1f9bfa6-2366-dbea-e3cc-f177786eedd1",
+				"outcome_id": "cb6b2f68-9a09-46b9-b372-ca73f02783f7",
+				"uncertainty_id": "4da98157-26a5-424f-a50e-3e9fcaced58e",
+				"project_id": "561561a1-f522-452e-9b23-bcc37fbbc019",
+				"probability": 0,
+				"parent_outcome_ids": [],
+				"parent_option_ids": []
+			},
+			{
+				"id": "b23f9b73-5e97-7309-8add-5becb7040f88",
+				"outcome_id": "0160da48-21cc-4acd-831f-666c7d2ca3c2",
+				"uncertainty_id": "4da98157-26a5-424f-a50e-3e9fcaced58e",
+				"project_id": "561561a1-f522-452e-9b23-bcc37fbbc019",
+				"probability": 0,
+				"parent_outcome_ids": [],
+				"parent_option_ids": []
+			},
+			{
+				"id": "b4175b08-1d48-7b3f-0e59-9b58a47f5132",
+				"outcome_id": "30804059-bb77-4c95-81f3-9b1bfad64ff2",
+				"uncertainty_id": "4da98157-26a5-424f-a50e-3e9fcaced58e",
+				"project_id": "561561a1-f522-452e-9b23-bcc37fbbc019",
+				"probability": 0,
+				"parent_outcome_ids": [],
+				"parent_option_ids": []
+			},
+			{
+				"id": "bcafacae-2d17-2d8b-1807-23b8b0b8a81d",
+				"outcome_id": "c9589adc-7494-4ae9-8c0a-be8e8cb6b125",
+				"uncertainty_id": "4da98157-26a5-424f-a50e-3e9fcaced58e",
+				"project_id": "561561a1-f522-452e-9b23-bcc37fbbc019",
+				"probability": 0,
+				"parent_outcome_ids": [],
+				"parent_option_ids": []
+			},
+			{
+				"id": "c664ff41-5b81-9f3d-f3de-1e5c0eb234de",
+				"outcome_id": "c13f3bd2-a035-4e16-a8ad-14aa2e1e9d52",
+				"uncertainty_id": "4da98157-26a5-424f-a50e-3e9fcaced58e",
+				"project_id": "561561a1-f522-452e-9b23-bcc37fbbc019",
+				"probability": 0,
+				"parent_outcome_ids": [],
+				"parent_option_ids": []
+			},
+			{
+				"id": "ce3c9a9f-3360-b328-d64b-45e3c00c6856",
+				"outcome_id": "dc95ba28-bbd5-4270-a435-4c38c5b3db80",
+				"uncertainty_id": "4da98157-26a5-424f-a50e-3e9fcaced58e",
+				"project_id": "561561a1-f522-452e-9b23-bcc37fbbc019",
+				"probability": 0,
+				"parent_outcome_ids": [],
+				"parent_option_ids": []
+			},
+			{
+				"id": "e465a949-4f47-451a-164e-29d236238e84",
+				"outcome_id": "5ae811da-2c54-4c96-8533-c33207949750",
+				"uncertainty_id": "4da98157-26a5-424f-a50e-3e9fcaced58e",
+				"project_id": "561561a1-f522-452e-9b23-bcc37fbbc019",
+				"probability": 0,
+				"parent_outcome_ids": [],
+				"parent_option_ids": []
+			},
+			{
+				"id": "f6afb7f1-a268-581e-1f94-09090f3dbd4d",
+				"outcome_id": "fbdbc827-444c-4c4b-b68a-158610ef6e00",
+				"uncertainty_id": "4da98157-26a5-424f-a50e-3e9fcaced58e",
+				"project_id": "561561a1-f522-452e-9b23-bcc37fbbc019",
+				"probability": 0,
+				"parent_outcome_ids": [],
+				"parent_option_ids": []
+			}
+		],
+		"discrete_utilities": [],
+		"restriction_tables": []
+	}
+}
