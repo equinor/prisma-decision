@@ -1,7 +1,7 @@
 import { NodeProps, NodeResizer, useReactFlow } from '@xyflow/react';
 import { useUpdateWhiteboardNodes } from '../../../hooks/api/useUpdateWhiteboardNodes';
 import { ReactFlowWhiteboardNode } from '../../../types';
-import { FREEHAND_BASE_STROKE_WIDTH, scaleFreehandPath } from './freehandPath';
+import { scaleFreehandPath } from './freehandPath';
 import {
 	whiteboardNodeStrokeColor,
 	whiteboardNodeResizerHandleStyle,
@@ -15,6 +15,14 @@ export const FreehandNode = ({ data, selected }: NodeProps<ReactFlowWhiteboardNo
 	const resolvedWidth = Math.max(data.width ?? 1, 1);
 	const resolvedHeight = Math.max(data.height ?? 1, 1);
 	const strokeOpacity = (data.opacity ?? 100) / 100;
+	const strokeColor =
+		data.color === undefined || data.color === 'default'
+			? whiteboardNodeStrokeColor
+			: data.color;
+	let lineStyle: string | undefined;
+	if (data.stroke_style === 'Dashed') lineStyle = '16 16';
+	if (data.stroke_style === 'Dotted') lineStyle = '3 10';
+	const strokeWidth = data.stroke_width ?? MEDIUM_STROKE_WIDTH;
 
 	return (
 		<>
@@ -63,25 +71,15 @@ export const FreehandNode = ({ data, selected }: NodeProps<ReactFlowWhiteboardNo
 				/>
 				<path
 					d={data.data}
-					stroke={
-						data?.color && data.color === 'default'
-							? whiteboardNodeStrokeColor
-							: data.color
-					}
-					fill={
-						data?.color && data.color === 'default'
-							? whiteboardNodeStrokeColor
-							: data.color
-					}
+					stroke={strokeColor}
+					fill='none'
+					strokeDasharray={lineStyle}
 					opacity={strokeOpacity}
-					strokeWidth={Math.max(
-						(data.stroke_width ?? MEDIUM_STROKE_WIDTH) - FREEHAND_BASE_STROKE_WIDTH,
-						0,
-					)}
+					strokeWidth={strokeWidth}
+					strokeLinecap='round'
 					strokeLinejoin='round'
-					paintOrder='stroke fill'
 					vectorEffect='non-scaling-stroke'
-					pointerEvents='fill'
+					pointerEvents='stroke'
 				/>
 			</svg>
 		</>

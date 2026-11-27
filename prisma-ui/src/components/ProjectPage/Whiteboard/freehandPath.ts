@@ -1,40 +1,34 @@
-import { getStroke, type StrokeOptions } from 'perfect-freehand';
+import { getStrokePoints, type StrokeOptions } from 'perfect-freehand';
 
 export type FreehandInputPoint = [x: number, y: number];
-
-type OutlinePoint = [x: number, y: number];
 
 const average = (first: number, second: number) => (first + second) / 2;
 export const FREEHAND_BASE_STROKE_WIDTH = 2;
 export const FREEHAND_STROKE_OPTIONS: StrokeOptions = {
 	size: FREEHAND_BASE_STROKE_WIDTH,
-	thinning: 0.55,
-	smoothing: 0.65,
 	streamline: 0.45,
-	simulatePressure: true,
 	last: true,
 };
 
-const getSvgPathFromStroke = (points: OutlinePoint[]) => {
-	if (points.length < 4) return '';
+const formatPoint = ([x, y]: FreehandInputPoint) => `${x.toFixed(2)},${y.toFixed(2)}`;
 
-	let result = '';
-	let first = points[0];
-	let second = points[1];
-	const third = points[2];
+const getSvgPathFromStroke = (points: FreehandInputPoint[]) => {
+	if (points.length === 0) return '';
 
-	result = `M${first[0].toFixed(2)},${first[1].toFixed(2)} Q${second[0].toFixed(2)},${second[1].toFixed(2)} ${average(second[0], third[0]).toFixed(2)},${average(second[1], third[1]).toFixed(2)} T`;
-
-	for (let index = 2; index < points.length - 1; index += 1) {
-		first = points[index];
-		second = points[index + 1];
-		result += `${average(first[0], second[0]).toFixed(2)},${average(first[1], second[1]).toFixed(2)} `;
+	let result = `M${formatPoint(points[0])}`;
+	for (let index = 1; index < points.length - 1; index += 1) {
+		const point = points[index];
+		const nextPoint = points[index + 1];
+		result += ` Q${formatPoint(point)} ${formatPoint([
+			average(point[0], nextPoint[0]),
+			average(point[1], nextPoint[1]),
+		])}`;
 	}
 
-	return `${result}Z`;
+	return `${result} L${formatPoint(points[points.length - 1])}`;
 };
 
-const getOutlineBounds = (points: OutlinePoint[]) => {
+const getStrokeBounds = (points: FreehandInputPoint[]) => {
 	const [firstPoint] = points;
 	if (!firstPoint) {
 		return {
@@ -65,14 +59,18 @@ export const createFreehandGeometry = (
 	points: FreehandInputPoint[],
 	strokeOptions?: Partial<StrokeOptions>,
 ) => {
-	const strokePoints = getStroke(points, {
-		...FREEHAND_STROKE_OPTIONS,
-		...strokeOptions,
-	}) as OutlinePoint[];
-	const bounds = getOutlineBounds(strokePoints);
-	const normalizedPoints = strokePoints.map(
-		([x, y]) => [x - bounds.minX, y - bounds.minY] as OutlinePoint,
-	);
+	const strokePoints =
+		points.length === 1
+			? points
+			: getStrokePoints(points, {
+					...FREEHAND_STROKE_OPTIONS,
+					...strokeOptions,
+				}).map(({ point }) => point);
+	const bounds = getStrokeBounds(strokePoints);
+	const normalizedPoints = strokePoints.map<FreehandInputPoint>(([x, y]) => [
+		x - bounds.minX,
+		y - bounds.minY,
+	]);
 
 	return {
 		position: {
