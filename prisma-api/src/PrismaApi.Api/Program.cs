@@ -41,15 +41,23 @@ public class Program
         if (!isPublicInstance && !isResearchInstance)
         {
             var clientSecret = Environment.GetEnvironmentVariable("CLIENT_SECRET");
-            if (!string.IsNullOrEmpty(clientSecret))
+            var installationId = Environment.GetEnvironmentVariable("GITHUB_INSTALLATION_ID");
+            var appId = Environment.GetEnvironmentVariable("APP_ID");
+            var privateKeyBase64 = Environment.GetEnvironmentVariable("GITHUB_PRIVATE_KEY_BASE64");
+            if (!string.IsNullOrEmpty(clientSecret) && !string.IsNullOrEmpty(installationId) && !string.IsNullOrEmpty(appId) && !string.IsNullOrEmpty(privateKeyBase64))
             {
                 builder.Configuration["AzureAd:ClientSecret"] = clientSecret;
+                builder.Configuration["GitHub:InstallationId"] = installationId;
+                builder.Configuration["GitHub:AppId"] = appId;
+                builder.Configuration["GitHub:PrivateKeyBase64"] = privateKeyBase64;
             }
 
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddMicrosoftIdentityWebApi(builder.Configuration, "AzureAd")
                 .EnableTokenAcquisitionToCallDownstreamApi()
                 .AddDownstreamApi("FastApi", builder.Configuration.GetSection("FastApiService"))
+                .AddDownstreamApi(PrismaDecisionAiApiService.ServiceName,
+                    builder.Configuration.GetSection(PrismaDecisionAiApiService.ServiceName))
                 .AddMicrosoftGraph(builder.Configuration.GetSection("GraphApi"))
                 .AddInMemoryTokenCaches();
         }
@@ -165,6 +173,19 @@ public class Program
         builder.Services.AddScoped<IAssessmentService, AssessmentService>();
         builder.Services.AddScoped<IDecisionQualityAssessmentService, DecisionQualityAssessmentService>();
         builder.Services.AddHttpClient<IFastApiService, FastApiService>();
+        builder.Services.AddHttpClient<IGitHubApiService, GitHubApiService>();
+
+        if (isPublicInstance || isResearchInstance)
+        {
+            // No Entra token acquisition in these modes, so the AI API cannot be called.
+            builder.Services.AddScoped<IPrismaDecisionAiApiService>(_ =>
+                throw new InvalidOperationException(
+                    "The Prisma Decision AI API is not available in Public or Research mode."));
+        }
+        else
+        {
+            builder.Services.AddScoped<IPrismaDecisionAiApiService, PrismaDecisionAiApiService>();
+        }
 
         builder.Services.AddControllers()
             .AddJsonOptions(options =>
